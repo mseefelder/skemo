@@ -1,0 +1,33 @@
+{
+  "name": "skemo",
+  "homepage": "https://github.com/mseefelder/skemo",
+  "authors": [
+    "mseefelder <saa.marcos@gmail.com>"
+  ],
+  "description": "Sketch-based modelling for the masses.",
+  "main": "",
+  "moduleType": [],
+  "keywords": [
+    "sketch",
+    "modelling",
+    "3d",
+    "mesh",
+    "inflate",
+    "computer",
+    "graphics",
+    "delaunay",
+    "sketch-based"
+  ],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "delaunay-fast": "~1.0.1"
+  }
+}
