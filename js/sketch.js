@@ -13,10 +13,11 @@ var canvas, ctx, flag = false,
 var borderVertices = [];
 //in pixel
 //var gridCellSize = 10;
-var pointDistance = 100;
+var pointDistance = 2500;
 var pointDistance1 = Math.sqrt(pointDistance);
 //mesh points.
 var borderPoints = [];
+var contour = [];
 //var innerPoints = [];
 
 var x = "black",
@@ -38,7 +39,8 @@ function init() {
     }, false);
     canvas.addEventListener("mouseup", function (e) {
         findxy('up', e);
-        fillBorder(maxX, minX, maxY, minY, borderVertices);
+        //fillBorder(maxX, minX, maxY, minY, borderVertices);
+        triangles();
     }, false);
     canvas.addEventListener("mouseout", function (e) {
         findxy('out', e)
@@ -46,13 +48,15 @@ function init() {
 }
 
 function draw() {
+  ctx.strokeStyle = "red";
+  ctx.lineWidth = 1;
   ctx.beginPath();
   ctx.moveTo(prevX, prevY);
   ctx.lineTo(currX, currY);
-  ctx.strokeStyle = x;
-  ctx.lineWidth = y;
   ctx.stroke();
   ctx.closePath();
+  ctx.strokeStyle = x;
+  ctx.lineWidth = y;
   var distance = distance2(lastX, lastY, currX, currY);
 
   if (distance == pointDistance ) {
@@ -120,6 +124,7 @@ function createVertex (valueX, valueY) {
   ctx.fillStyle = style;
   point = [valueX,valueY];
   borderVertices.push(point);
+  contour.push({x:valueX, y:valueY, id:(contour.length+1)});
 }
 function fullCanvas() {
     var width  = window.innerWidth;//canvas.clientWidth * window.devicePixelRatio | 0;
@@ -180,4 +185,23 @@ function intersect(aX, aY, bX, bY, cX, cY,dX, dY) {
   return ccw(aX, aY, cX, cY, dX, dY) !=
           ccw(bX, bY, cX, cY, dX, dY) && ccw(aX, aY, bX, bY, cX, cY) !=
           ccw(aX, aY, bX, bY, dX, dY);
+}
+
+function triangles() {
+  var swctx = new poly2tri.SweepContext(contour);
+  swctx.triangulate();
+  var triangles = swctx.getTriangles();
+  triangles.forEach(function(t) {
+    t.getPoints().forEach(function(p) {
+        console.log(p.id);
+    });
+    console.log("X");
+    //draw tri
+    ctx.beginPath();
+    ctx.moveTo(t.getPoint(0).x, t.getPoint(0).y);
+    ctx.lineTo(t.getPoint(1).x, t.getPoint(1).y);
+    ctx.lineTo(t.getPoint(2).x, t.getPoint(2).y);
+    ctx.closePath();
+    ctx.stroke();
+  });
 }

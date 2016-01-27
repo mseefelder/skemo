@@ -28,6 +28,7 @@
     "tests"
   ],
   "dependencies": {
-    "delaunay-fast": "~1.0.1"
+    "delaunay-fast": "~1.0.1",
+    "poly2tri": "^1.3.5"
   }
 }
