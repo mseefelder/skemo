@@ -13,11 +13,12 @@ var canvas, ctx, flag = false,
 var borderVertices = [];
 //in pixel
 //var gridCellSize = 10;
-var pointDistance = 2500;
+var pointDistance = 400;
 var pointDistance1 = Math.sqrt(pointDistance);
 //mesh points.
 var borderPoints = [];
 var contour = [];
+var steiner = [];
 //var innerPoints = [];
 
 var x = "black",
@@ -39,7 +40,7 @@ function init() {
     }, false);
     canvas.addEventListener("mouseup", function (e) {
         findxy('up', e);
-        //fillBorder(maxX, minX, maxY, minY, borderVertices);
+        fillBorder(maxX, minX, maxY, minY, borderVertices);
         triangles();
     }, false);
     canvas.addEventListener("mouseout", function (e) {
@@ -143,36 +144,39 @@ function distance2 (aX, aY, bX, bY){
 }
 
 function fillBorder (maxPointX,minPointX, maxPointY,minPointY , borderVertices) {
-  console.log("entrei");
+  console.log("entrei", maxX, minX, maxY, minY);
   var odd = false;
   var fillPoints = [];
-  for (var i = minPointX; i <= maxPointX; i+= pointDistance1 ) {
-    for (var j = minPointY; j < maxPointY; j+= pointDistance1){
-      var point = [i,j];
-      var lastpoint = [i,j-pointDistance];
-      /*for (var k = 0; k < borderVertices.length ; k ++){
-        var x = (k+1)% borderVertices.length;
+  for (var i = minPointX - pointDistance1; i < maxPointX; i+= pointDistance1) {
+    for (var j = minPointY - pointDistance1; j < maxPointY; j+= pointDistance1) {
+      odd = false;//test number os crossings with edge for the segment tha goes:
+      var point = [i,j];//from the current point...
+      var lastpoint = [i,minPointY];//to the first one on this column.
+      
+      for (var k = 0; k < borderVertices.length ; k ++){
+        var a = (k+1) % borderVertices.length;
         var intersected = intersect(borderVertices[k][0],borderVertices[k][1],
-                                    borderVertices[x][0],borderVertices[x][1],
+                                    borderVertices[a][0],borderVertices[a][1],
                                     lastpoint[0],lastpoint[1],
                                     point[0],point[1]);
-        console.log(intersected);
         if(intersected) {
           odd = !odd;
         }
-      }*/
-      if (!odd) {
+      }
+
+      if (odd) {
         fillPoints.push(point);
+        steiner.push({x: i, y: j, id: (steiner.length + 1)});
         var style = ctx.fillStyle;
         ctx.fillStyle = "#02E020";
         ctx.beginPath();
         ctx.arc(point[0],point[1],2,0,2*Math.PI);
         ctx.fill();
         ctx.fillStyle = style;
-        borderVertices.push(point);
       }
     }
   }
+
   return fillPoints;
 }
 
@@ -189,13 +193,14 @@ function intersect(aX, aY, bX, bY, cX, cY,dX, dY) {
 
 function triangles() {
   var swctx = new poly2tri.SweepContext(contour);
+  swctx.addPoints(steiner);
   swctx.triangulate();
   var triangles = swctx.getTriangles();
   triangles.forEach(function(t) {
     t.getPoints().forEach(function(p) {
         console.log(p.id);
     });
-    console.log("X");
+    //console.log("X");
     //draw tri
     ctx.beginPath();
     ctx.moveTo(t.getPoint(0).x, t.getPoint(0).y);
