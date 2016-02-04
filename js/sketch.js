@@ -26,7 +26,7 @@ var arrayDistance = null;
 var x = "black",
     y = 2;
 
-function init() {
+function init () {
     canvas = document.getElementById('canvas');
     ctx = canvas.getContext("2d");
     fullCanvas();
@@ -43,7 +43,7 @@ function init() {
     canvas.addEventListener("mouseup", function (e) {
         findxy('up', e);
         //connectEndPoint();
-        fillBorder(maxX, minX, maxY, minY, borderVertices);
+        fillBorderBruteForce(maxX, minX, maxY, minY, borderVertices);
         getMesh();
     }, false);
     canvas.addEventListener("mouseout", function (e) {
@@ -51,7 +51,7 @@ function init() {
     }, false);
 }
 
-function draw() {
+function draw () {
   ctx.strokeStyle = "red";
   ctx.lineWidth = 1;
   ctx.beginPath();
@@ -76,7 +76,7 @@ function draw() {
   }
 }
 
-function findxy(res, e) {
+function findxy (res, e) {
     if (res == 'down') {
         prevX = currX;
         prevY = currY;
@@ -113,6 +113,7 @@ function findxy(res, e) {
         }
     }
 }
+
 function createVertex (valueX, valueY) {
   lastX = currX;
   lastY = currY;
@@ -130,6 +131,7 @@ function createVertex (valueX, valueY) {
   borderVertices.push(point);
   contour.push({x:valueX, y:valueY, id:(contour.length+1)});
 }
+
 function fullCanvas() {
     var width  = window.innerWidth;//canvas.clientWidth * window.devicePixelRatio | 0;
     var height = window.innerHeight;//canvas.clientHeight * window.devicePixelRatio | 0;
@@ -146,15 +148,21 @@ function distance2 (aX, aY, bX, bY){
   return (aX - bX)*(aX - bX) + (aY - bY)*(aY - bY);
 }
 
-function fillBorder (maxPointX,minPointX, maxPointY,minPointY , borderVertices) {
+function fillBorderBruteForce (maxPointX,minPointX, maxPointY,minPointY , borderVertices) {
   console.log("entrei", maxX, minX, maxY, minY);
   var odd = false;
   var fillPoints = [];
   for (var i = minPointX - pointDistance1; i < maxPointX; i+= pointDistance1) {
+    var style = ctx.fillStyle;
+        ctx.fillStyle = "#E0A000";
+        ctx.beginPath();
+        ctx.arc(i,minPointY-2*pointDistance1,2,0,2*Math.PI);
+        ctx.fill();
+        ctx.fillStyle = style;
     for (var j = minPointY - pointDistance1; j < maxPointY; j+= pointDistance1) {
       odd = false;//test number os crossings with edge for the segment tha goes:
       var point = [i,j];//from the current point...
-      var lastpoint = [i,minPointY];//to the first one on this column.
+      var lastpoint = [i,minPointY-2*pointDistance1];//to the first one on this column.
       
       for (var k = 0; k < borderVertices.length ; k ++){
         var a = (k+1) % borderVertices.length;
@@ -171,7 +179,7 @@ function fillBorder (maxPointX,minPointX, maxPointY,minPointY , borderVertices) 
         fillPoints.push(point);
         steiner.push({x: i, y: j, id: (steiner.length + 1)});
         var style = ctx.fillStyle;
-        ctx.fillStyle = "#02E020";
+        ctx.fillStyle = "#00F0A0";
         ctx.beginPath();
         ctx.arc(point[0],point[1],2,0,2*Math.PI);
         ctx.fill();
@@ -184,18 +192,20 @@ function fillBorder (maxPointX,minPointX, maxPointY,minPointY , borderVertices) 
 }
 
 
-function ccw(aX, aY, bX, bY, cX, cY) {
+function ccw (aX, aY, bX, bY, cX, cY) {
   return (cY-aY)*(bX-aX) > (bY-aY)*(cX-aX);
 }
 
-function intersect(aX, aY, bX, bY, cX, cY,dX, dY) {
+function intersect (aX, aY, bX, bY, cX, cY,dX, dY) {
   return ccw(aX, aY, cX, cY, dX, dY) !=
           ccw(bX, bY, cX, cY, dX, dY) && ccw(aX, aY, bX, bY, cX, cY) !=
           ccw(aX, aY, bX, bY, dX, dY);
 }
 
-function getMesh() {
-  let swctx = new poly2tri.SweepContext(contour);
+function getMesh () {
+  getDistanceVector();
+  
+  var swctx = new poly2tri.SweepContext(contour);
   swctx.addPoints(steiner);
   swctx.triangulate();
   triangles = swctx.getTriangles();
@@ -212,7 +222,7 @@ function getMesh() {
     ctx.closePath();
     ctx.stroke();
   });
-  getDistanceVector();
+  
   debugInflate();
 }
 
@@ -222,23 +232,52 @@ function getDistanceVector () {
 
   contour.map( function (pointBorder) {
     steiner.map ( function (pointSteiner) {
-      let distance = distance2(pointBorder.x, pointBorder.y, pointSteiner.x, pointSteiner.y);
+      var index = (pointBorder.id == contour.length) ? 0 : pointBorder.id;
+      var distance = distance2(pointBorder.x, pointBorder.y, pointSteiner.x, pointSteiner.y);
+ //pointToSegment(pointBorder, contour[index], pointSteiner);//
       if (arrayDistance[pointSteiner.id - 1] == - 1 || arrayDistance[pointSteiner.id - 1] > distance) {
         arrayDistance[pointSteiner.id -1] = distance;
       } 
     });
   });
-  let aD1 = arrayDistance.map (function (p) {
-     return Math.sqrt(p);
-    
+
+  //para todo pS: se arrayDistance[pS.id] < pointDistance: remove pS
+  /**/
+  steiner = steiner.filter( function (p) {
+    if (arrayDistance[p.id - 1] >= pointDistance1) {
+     return true;
+   } else {
+    arrayDistance[p.id - 1] = -1;
+    return false;
+   }
+  });
+
+  arrayDistance = arrayDistance.filter( function (d) {
+    return d != -1;
+  });
+  /**/
+
+  var aD1 = arrayDistance.map (function (p) {
+     return p;//Math.sqrt(p);
   });
   console.log(aD1);
   
 }
 
-function debugInflate() {
-  let maxDistance = 0;
-  let minDistance = -1;
+function pointToSegment (a, b, p) {
+  lc = [b.x-a.x, b.y-a.y];
+  lenlc = Math.sqrt(lc[0]*lc[0] + lc[1]*lc[1]);
+  lcn = [lc[0]/lenlc, lc[1]/lenlc];
+  vp = [p.x-a.x, p.y-a.y];
+  mult = vp[0]*lcn[0] + vp[1]*lcn[1];
+  vd = [vp[0]-(mult*lcn[0]), vp[1]-(mult*lcn[1])];
+  lenvd = Math.sqrt(vd[0]*vd[0] + vd[1]*vd[1]);
+  return lenvd;
+}
+
+function debugInflate () {
+  var maxDistance = 0;
+  var minDistance = -1;
   arrayDistance.map( function (d) {
     if (d > maxDistance) {
       maxDistance = d;
@@ -250,13 +289,13 @@ function debugInflate() {
 
   maxDistance = maxDistance - minDistance;
 
-  let normalArrayDistance = arrayDistance.map( function (d) {
+  var normalArrayDistance = arrayDistance.map( function (d) {
     return (d - minDistance) / maxDistance;
   });
   console.log(normalArrayDistance);
-  let style = ctx.fillStyle;
+  var style = ctx.fillStyle;
   normalArrayDistance.map( function (d, i) {
-    let value = parseInt(d*255);
+    var value = parseInt(d*255);
     //console.log(value);
     ctx.beginPath();
     ctx.arc( steiner[i].x, steiner[i].y ,pointDistance1/2.0, 0, 2*Math.PI);
@@ -268,18 +307,18 @@ function debugInflate() {
 /**
 //Not working as expected
 function connectEndPoint () {
-  let firstPoint = contour[0];
-  let lastPoint = contour[contour.length -1];
-  let segment =  function (t) {
+  var firstPoint = contour[0];
+  var lastPoint = contour[contour.length -1];
+  var segment =  function (t) {
     return [firstPoint.x + t*(lastPoint.x - firstPoint.x), firstPoint.y + t*(lastPoint.y - firstPoint.y)];
   }
-  let d = Math.sqrt(distance2(firstPoint.x, firstPoint.y, lastPoint.x, lastPoint.y));
-  let n = parseInt(d / pointDistance1);
-  let s = 1.0 / n ;
+  var d = Math.sqrt(distance2(firstPoint.x, firstPoint.y, lastPoint.x, lastPoint.y));
+  var n = parseInt(d / pointDistance1);
+  var s = 1.0 / n ;
   console.log("POINTS  "+n);
   for (var i = 1; i < n ; i++) {
     console.log("PARAM  "+i*s);
-    let vtx = segment(i*s);
+    var vtx = segment(i*s);
     console.log("VERTEX  "+vtx);
     createVertex(vtx[0], vtx[1]);
   }
