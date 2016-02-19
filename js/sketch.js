@@ -204,6 +204,22 @@ function intersect (aX, aY, bX, bY, cX, cY,dX, dY) {
           ccw(aX, aY, bX, bY, dX, dY);
 }
 
+function findIntersection (aX, aY, bX, bY, cX, cY,dX, dY) {
+  var a1 = aX - bX;
+  var b1 = aY - bY;
+  var c1 = aX*bY - aY*bX;
+
+  var a2 = cX - dX;
+  var b2 = cY - dY;
+  var c2 = cX*dY - cY*dX;
+
+  var det = a1*b2-b1*a2;
+  var x = (c1*a2 - a1*c2)/det;
+  var y = (c1*b2 - b1*c2)/det;
+
+  return [x, y]
+}
+
 function getMesh () {
   getDistanceVector();
   
@@ -232,21 +248,23 @@ function getDistanceVector () {
   arrayDistance = new Array(steiner.length);
   arrayDistance.fill(-1);
 
-  contour.map( function (pointBorder) {
-    steiner.map ( function (pointSteiner) {
-      var index = (pointBorder.id == contour.length) ? 0 : pointBorder.id;
-      var distance = distance2(pointBorder.x, pointBorder.y, pointSteiner.x, pointSteiner.y);
- //pointToSegment(pointBorder, contour[index], pointSteiner);//
-      if (arrayDistance[pointSteiner.id - 1] == - 1 || arrayDistance[pointSteiner.id - 1] > distance) {
-        arrayDistance[pointSteiner.id -1] = distance;
-      } 
-    });
-  });
+  //calculate the distance of every steiner point to all he segments on the border
+  for (var j = 0; j < steiner.length; j++) {
+      for (var i = 0; i < contour.length; i++) {
+        var index = (i == (contour.length-1)) ? 0 : i+1;
+        //console.log(i, index);
+        var distance = pointToSegment(contour[i], contour[index], steiner[j]);
+        //var distance = distance2(steiner[j].x, steiner[j].y, contour[i].x, contour[i].y)
+        if (arrayDistance[j] == - 1 || arrayDistance[j] > distance) {
+          arrayDistance[j] = distance;
+        } 
+      };
+  };
 
-  //para todo pS: se arrayDistance[pS.id] < pointDistance: remove pS
+  //for all pS: if arrayDistance[pS.id] < pointDistance: remove pS
   /**/
   steiner = steiner.filter( function (p) {
-    if (arrayDistance[p.id - 1] >= pointDistance1) {
+    if (arrayDistance[p.id - 1] >= pointDistance) {
      return true;
    } else {
     arrayDistance[p.id - 1] = -1;
@@ -260,21 +278,24 @@ function getDistanceVector () {
   /**/
 
   var aD1 = arrayDistance.map (function (p) {
-    return p;//Math.sqrt(p);
+     return p;
   });
   console.log(aD1);
   
 }
 
 function pointToSegment (a, b, p) {
-  lc = [b.x-a.x, b.y-a.y];
-  lenlc = Math.sqrt(lc[0]*lc[0] + lc[1]*lc[1]);
-  lcn = [lc[0]/lenlc, lc[1]/lenlc];
-  vp = [p.x-a.x, p.y-a.y];
-  mult = vp[0]*lcn[0] + vp[1]*lcn[1];
-  vd = [vp[0]-(mult*lcn[0]), vp[1]-(mult*lcn[1])];
-  lenvd = Math.sqrt(vd[0]*vd[0] + vd[1]*vd[1]);
-  return lenvd;
+  var vecP = [p.x-a.x, p.y-a.y];
+  var vecR = [b.x-a.x, b.y-a.y];
+  var lenVecR = Math.sqrt(vecR[0]*vecR[0]+vecR[1]*vecR[1]);
+  var lenProj = vecP[0]*(vecR[0]/lenVecR) + vecP[1]*(vecR[1]/lenVecR);
+  if (lenProj <= 0) { //closer to a
+    return distance2(p.x,p.y,a.x,a.y);
+  } else if (lenProj >= lenVecR) { //closer to b
+    return distance2(p.x,p.y,a.x,a.y);
+  } else {//projection lies inside projection
+    return distance2(p.x, p.y, a.x+(lenProj*vecR[0]/lenVecR), a.y+(lenProj*vecR[1]/lenVecR));
+  }
 }
 
 function debugInflate () {
@@ -305,24 +326,3 @@ function debugInflate () {
     ctx.fill();
   } );
 }
-
-/**
-//Not working as expected
-function connectEndPoint () {
-  var firstPoint = contour[0];
-  var lastPoint = contour[contour.length -1];
-  var segment =  function (t) {
-    return [firstPoint.x + t*(lastPoint.x - firstPoint.x), firstPoint.y + t*(lastPoint.y - firstPoint.y)];
-  }
-  var d = Math.sqrt(distance2(firstPoint.x, firstPoint.y, lastPoint.x, lastPoint.y));
-  var n = parseInt(d / pointDistance1);
-  var s = 1.0 / n ;
-  console.log("POINTS  "+n);
-  for (var i = 1; i < n ; i++) {
-    console.log("PARAM  "+i*s);
-    var vtx = segment(i*s);
-    console.log("VERTEX  "+vtx);
-    createVertex(vtx[0], vtx[1]);
-  }
-}
-/**/
