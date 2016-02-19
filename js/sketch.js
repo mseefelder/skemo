@@ -80,7 +80,7 @@ function findxy (res, e) {
     if (res == 'down') {
         prevX = currX;
         prevY = currY;
-        currX = e.clientX - canvas.offsetLeft;
+        currX = e.clientX - $('canvas').offset().left;
         currY = e.clientY - canvas.offsetTop;
         maxX = currX;
         minX = currX;
@@ -107,8 +107,9 @@ function findxy (res, e) {
         if (flag) {
             prevX = currX;
             prevY = currY;
-            currX = e.clientX - canvas.offsetLeft;
+            currX = e.clientX - $('canvas').offset().left;
             currY = e.clientY - canvas.offsetTop;
+            console.log(e.clientX, currX, canvas.offsetTop);
             draw();
         }
     }
@@ -133,6 +134,7 @@ function createVertex (valueX, valueY) {
 }
 
 function fullCanvas() {
+    var sidebar = $('nav').width();
     var width  = window.innerWidth;//canvas.clientWidth * window.devicePixelRatio | 0;
     var height = window.innerHeight;//canvas.clientHeight * window.devicePixelRatio | 0;
     //console.log(width, height);
@@ -258,7 +260,7 @@ function getDistanceVector () {
   /**/
 
   var aD1 = arrayDistance.map (function (p) {
-     return p;//Math.sqrt(p);
+    return p;//Math.sqrt(p);
   });
   console.log(aD1);
   
