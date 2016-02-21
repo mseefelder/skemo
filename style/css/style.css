@@ -149,3 +149,7 @@
   section{
     padding-left: 15px;
   }
+
+  .navbar-nav>li>a {
+    padding-right: 8px !important;
+  }
