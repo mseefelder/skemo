@@ -4,10 +4,13 @@
     <meta charset="utf8">
 
 	<script type="text/javascript" src="bower_components/poly2tri/dist/poly2tri.min.js"></script>
-	<script type="text/javascript" src="js/sketch.js"></script>
+	<script type="text/javascript" src="js/sketchSingleton.js"></script>
 	<script type="text/javascript" src="bower_components/jquery/dist/jquery.min.js"></script>
 	<script type="text/javascript" src="style/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="bower_components/three.js/three.min.js"></script>
+	<script type="text/javascript" src="js/world.js"></script>
 	<script type="text/javascript" src="style/js/style.js"></script>
+	<script type="text/javascript" src="js/main.js"></script>
 
 	<link rel="stylesheet" type="text/css" href="style/css/style.css">
 	<link rel="stylesheet" type="text/css" href="style/css/bootstrap.min.css">
@@ -20,7 +23,8 @@
 <body onload="init()" style="overflow: hidden; display: block; margin: 0px;">
 
 <div class="main off-canvas-menu">
-	<canvas id="canvas"></canvas>
+	<canvas id="2dcanvas"></canvas>
+	<canvas id="3dcanvas"></canvas>
 </div>
 <!-- <body> -->
 

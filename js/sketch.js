@@ -1,4 +1,4 @@
-var canvas, ctx, flag = false,
+var canvas2d, ctx, flag = false,
     prevX = 0,
     currX = 0,
     prevY = 0,
@@ -26,27 +26,27 @@ var arrayDistance = null;
 var x = "black",
     y = 2;
 
-function init () {
-    canvas = document.getElementById('canvas');
-    ctx = canvas.getContext("2d");
-    fullCanvas();
-    w = canvas.width;
-    h = canvas.height;
+function init2d () {
+    canvas2d = document.getElementById('2dcanvas');
+    ctx = canvas2d.getContext("2d");
+    fullCanvas(canvas2d);
+    w = canvas2d.width;
+    h = canvas2d.height;
     console.log("init", w, h);
 
-    canvas.addEventListener("mousemove", function (e) {
+    canvas2d.addEventListener("mousemove", function (e) {
         findxy('move', e)
     }, false);
-    canvas.addEventListener("mousedown", function (e) {
+    canvas2d.addEventListener("mousedown", function (e) {
         findxy('down', e)
     }, false);
-    canvas.addEventListener("mouseup", function (e) {
+    canvas2d.addEventListener("mouseup", function (e) {
         findxy('up', e);
         //connectEndPoint();
         fillBorderBruteForce(maxX, minX, maxY, minY, borderVertices);
         getMesh();
     }, false);
-    canvas.addEventListener("mouseout", function (e) {
+    canvas2d.addEventListener("mouseout", function (e) {
         findxy('out', e)
     }, false);
 }
@@ -80,8 +80,9 @@ function findxy (res, e) {
     if (res == 'down') {
         prevX = currX;
         prevY = currY;
-        currX = e.clientX - $('canvas').offset().left;
-        currY = e.clientY - canvas.offsetTop;
+        currX = e.clientX - $('#2dcanvas').offset().left;//$('nav').width();//canvas2d.offsetLeft;//
+        //currX = e.clientX - canvas2d.offset().left;
+        currY = e.clientY - canvas2d.offsetTop;
         maxX = currX;
         minX = currX;
         maxY = currY;
@@ -107,9 +108,9 @@ function findxy (res, e) {
         if (flag) {
             prevX = currX;
             prevY = currY;
-            currX = e.clientX - $('canvas').offset().left;
-            currY = e.clientY - canvas.offsetTop;
-            console.log(e.clientX, currX, canvas.offsetTop);
+            currX = e.clientX - $('#2dcanvas').offset().left;//$('nav').width();//canvas2d.offsetLeft;//
+            currY = e.clientY - canvas2d.offsetTop;
+            console.log(e.clientX, currX, canvas2d.offsetTop);
             draw();
         }
     }
@@ -133,10 +134,11 @@ function createVertex (valueX, valueY) {
   contour.push({x:valueX, y:valueY, id:(contour.length+1)});
 }
 
-function fullCanvas() {
+function fullCanvas(canvas) {
     var sidebar = $('nav').width();
-    var width  = window.innerWidth;//canvas.clientWidth * window.devicePixelRatio | 0;
-    var height = window.innerHeight;//canvas.clientHeight * window.devicePixelRatio | 0;
+    console.log("Sidebar: ", sidebar);
+    var width  = window.innerWidth;//canvas2d.clientWidth * window.devicePixelRatio | 0;
+    var height = window.innerHeight;//canvas2d.clientHeight * window.devicePixelRatio | 0;
     //console.log(width, height);
     if (canvas.width !== width || canvas.height !== height) {
         canvas.width = width;
