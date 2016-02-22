@@ -10,6 +10,7 @@ var world = new function() {
 		fullCanvas(this.canvas3d);
 		scene = new THREE.Scene();
 		camera = new THREE.PerspectiveCamera( 75, this.canvas3d.width/this.canvas3d.height, 0.1, 1000 );
+		//camera = new THREE.OrthographicCamera( this.canvas3d.width / - 2, this.canvas3d.width / 2, this.canvas3d.height / 2, this.canvas3d.height / - 2, 1, 1000 );
 
 		renderer = new THREE.WebGLRenderer({canvas: this.canvas3d});
 		renderer.setSize( this.canvas3d.width, this.canvas3d.height );
@@ -21,14 +22,14 @@ var world = new function() {
 
 		camera.position.x = 0;
 		camera.position.y = 0;
-		camera.position.z = 1;
+		camera.position.z = 2;
 
 		render();	
 	}
 
 	this.buildObject = function (contour, steiner, arrayDistance, triangles) {
 		//var material = new THREE.MeshPhongMaterial( { color: 0xdddddd, specular: 0x009900, shininess: 30, shading: THREE.FlatShading } );
-		var material = new THREE.MeshBasicMaterial( { color: 0xff0000 } );;
+		var material = new THREE.MeshBasicMaterial( { color: 0xf0f000 } );;
 		var geometry = new THREE.Geometry();
 		console.log("Vertices:");
 		for (var i = 0; i < contour.length; i++) {
@@ -40,18 +41,22 @@ var world = new function() {
 		for (var i = 0; i < steiner.length; i++) {
 			console.log(steiner[i].x,  steiner[i].y, arrayDistance[i]);
 			geometry.vertices.push(
-				new THREE.Vector3( steiner[i].x,  steiner[i].y, arrayDistance[i] )
+				new THREE.Vector3( steiner[i].x,  steiner[i].y, Math.sqrt(arrayDistance[i]) )
 			);
 		};
 		console.log("Faces");
 		for (var i = 0; i < triangles.length; i++) {
 			console.log(triangles[i].getPoint(0).id, triangles[i].getPoint(1).id, triangles[i].getPoint(2).id);
-			geometry.faces.push( new THREE.Face3( triangles[i].getPoint(0).id, triangles[i].getPoint(1).id, triangles[i].getPoint(2).id ) );
+			geometry.faces.push( new THREE.Face3( triangles[i].getPoint(0).id-1, triangles[i].getPoint(1).id-1, triangles[i].getPoint(2).id-1 ) );
 		};
 
 		geometry.normalize();
+		console.log("Normalized");
+		for (var i = 0; i < geometry.vertices.length; i++) {
+			console.log(geometry.vertices[i]);
+		};
 
-		geometry.computeBoundingSphere();
+		//geometry.computeBoundingSphere();
 
 		object = new THREE.Mesh( geometry, material );
 		scene.add( object );
@@ -61,8 +66,12 @@ var world = new function() {
 	var render = function () {
 		requestAnimationFrame( render );
 
-		cube.rotation.x += 0.1;
-		cube.rotation.y += 0.1;
+		if (object) {
+			object.rotation.y += 0.05;
+		}
+			
+		//cube.rotation.x += 0.1;
+		//cube.rotation.y += 0.1;
 
 		renderer.render(scene, camera);
 	};
