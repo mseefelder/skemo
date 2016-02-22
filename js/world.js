@@ -1,25 +1,62 @@
 var world = new function() {
-	var scene, camera, renderer, cube;
+	var scene, camera, renderer, cube, object, parent;
 	var self = this;
 
-	this.init3d = function () {
-		var canvas3d = document.getElementById('3dcanvas');
-		fullCanvas(canvas3d);
-		scene = new THREE.Scene();
-		camera = new THREE.PerspectiveCamera( 75, canvas3d.width/canvas3d.height, 0.1, 1000 );
+	this.canvas3d = null;
 
-		renderer = new THREE.WebGLRenderer({canvas: canvas3d});
-		renderer.setSize( canvas3d.width, canvas3d.height );
+	this.init3d = function (p, canvas) {
+		parent = p;
+		this.canvas3d = canvas;//document.getElementById('3dcanvas');
+		fullCanvas(this.canvas3d);
+		scene = new THREE.Scene();
+		camera = new THREE.PerspectiveCamera( 75, this.canvas3d.width/this.canvas3d.height, 0.1, 1000 );
+
+		renderer = new THREE.WebGLRenderer({canvas: this.canvas3d});
+		renderer.setSize( this.canvas3d.width, this.canvas3d.height );
 
 		var geometry = new THREE.BoxGeometry( 1, 1, 1 );
 		var material = new THREE.MeshBasicMaterial( { color: 0xff0000 } );
 		cube = new THREE.Mesh( geometry, material );
-		scene.add( cube );
+		//scene.add( cube );
 
-		camera.position.z = 5;
+		camera.position.x = 0;
+		camera.position.y = 0;
+		camera.position.z = 1;
 
 		render();	
 	}
+
+	this.buildObject = function (contour, steiner, arrayDistance, triangles) {
+		//var material = new THREE.MeshPhongMaterial( { color: 0xdddddd, specular: 0x009900, shininess: 30, shading: THREE.FlatShading } );
+		var material = new THREE.MeshBasicMaterial( { color: 0xff0000 } );;
+		var geometry = new THREE.Geometry();
+		console.log("Vertices:");
+		for (var i = 0; i < contour.length; i++) {
+			console.log(contour[i].x,  contour[i].y, 0);
+			geometry.vertices.push(
+				new THREE.Vector3( contour[i].x,  contour[i].y, 0 )
+			);
+		};
+		for (var i = 0; i < steiner.length; i++) {
+			console.log(steiner[i].x,  steiner[i].y, arrayDistance[i]);
+			geometry.vertices.push(
+				new THREE.Vector3( steiner[i].x,  steiner[i].y, arrayDistance[i] )
+			);
+		};
+		console.log("Faces");
+		for (var i = 0; i < triangles.length; i++) {
+			console.log(triangles[i].getPoint(0).id, triangles[i].getPoint(1).id, triangles[i].getPoint(2).id);
+			geometry.faces.push( new THREE.Face3( triangles[i].getPoint(0).id, triangles[i].getPoint(1).id, triangles[i].getPoint(2).id ) );
+		};
+
+		geometry.normalize();
+
+		geometry.computeBoundingSphere();
+
+		object = new THREE.Mesh( geometry, material );
+		scene.add( object );
+
+	};
 
 	var render = function () {
 		requestAnimationFrame( render );
