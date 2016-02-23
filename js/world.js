@@ -24,19 +24,19 @@ var world = new function() {
 		camera.position.y = 0;
 		camera.position.z = 2;
 
-		var light1 = new THREE.PointLight( 0xff0000, 1, 100 );
-		light1.position.set( 5, 5, 5 );
+		var light1 = new THREE.PointLight( 0xffefef, 1, 100 );
+		light1.position.set( 15, 15, 15 );
 		scene.add( light1 );
 
-		var light2 = new THREE.PointLight( 0x0000ff, 1, 100 );
-		light2.position.set( -5, 5, 5 );
+		var light2 = new THREE.PointLight( 0xefefff, 1, 100 );
+		light2.position.set( -15, 15, 15 );
 		scene.add( light2 );
 
 		render();	
 	}
 
 	this.buildObject = function (contour, steiner, arrayDistance, triangles) {
-		var material = new THREE.MeshPhongMaterial( { color: 0xdddddd, specular: 0x009900, shininess: 30, shading: THREE.SmoothShading, side: THREE.DoubleSide } );
+		var material = new THREE.MeshPhongMaterial( { color: 0xdddddd, specular: 0xffffff, shininess: 10, shading: THREE.SmoothShading, side: THREE.DoubleSide } );
 		//var material = new THREE.MeshBasicMaterial( { color: 0xf0f000 } );;
 		var geometry = new THREE.Geometry();
 
