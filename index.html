@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf8">
+
+    <script type="text/javascript" src="js/utils.js"></script>
+	<script type="text/javascript" src="bower_components/poly2tri/dist/poly2tri.min.js"></script>
+	<script type="text/javascript" src="js/sketchSingleton.js"></script>
+	<script type="text/javascript" src="bower_components/jquery/dist/jquery.min.js"></script>
+	<script type="text/javascript" src="style/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="bower_components/three.js/three.min.js"></script>
+	<script type="text/javascript" src="js/world.js"></script>
+	<script type="text/javascript" src="style/js/style.js"></script>
+	<script type="text/javascript" src="js/main.js"></script>
+
+	<link rel="stylesheet" type="text/css" href="style/css/style.css">
+	<link rel="stylesheet" type="text/css" href="style/css/bootstrap.min.css">
+
+</head>
+<!-- http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css -->
+
+
+
+<body onload="main.init()" style="overflow: hidden; display: block; margin: 0px;">
+
+<div class="main off-canvas-menu">
+	<canvas id="2dcanvas"></canvas>
+	<canvas id="3dcanvas"></canvas>
+</div>
+<!-- <body> -->
+
+<nav class="navbar navbar-inverse sidebar uk-offcanvas-left" role="navigation" id="bs-sidebar-navbar-collapse-0">
+    <div class="container-fluid uk-offcanvas-left">
+		<!-- Brand and toggle get grouped for better mobile display -->
+		<div class="navbar-header" >
+			<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-sidebar-navbar-collapse-1">
+				<span class="sr-only">Toggle navigation</span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+			<a class="navbar-brand" href="#">SKEMO</a>
+		</div>
+		<!-- Collect the nav links, forms, and other content for toggling -->
+		<div class="" id="bs-sidebar-navbar-collapse-1">
+			<ul class="nav navbar-nav">
+				<li class="active">
+					<a href="#">Edit 
+						<img src="./style/icons/edit-icon.png" width="25px" class="pull-right hidden-xs showopacity">
+					</a>
+				</li>
+				<li >
+					<a href="#">Manipulate 
+						<img src="./style/icons/manipulate-icon.png" width="25px" class="pull-right hidden-xs showopacity">
+					</a>
+				</li>
+				<li >
+					<a href="#">Delete 
+						<img src="./style/icons/delete-icon.png" width="25px" class="pull-right hidden-xs showopacity">
+					</a>
+				</li>
+				<li >
+					<a href="#">Rotate 
+						<img src="./style/icons/rotate-icon.png" width="25px" class="pull-right hidden-xs showopacity">
+					</a>
+				</li>
+				<li >
+					<a href="#">Translate 
+						<img src="./style/icons/translate-icon.png" width="25px" class="pull-right hidden-xs showopacity">
+					</a>
+				</li>
+				<li class="dropdown">
+					<a href="#" class="dropdown-toggle" data-toggle="dropdown">Download<span class="caret"></span>
+						<img src="./style/icons/download-button.png" width="25px" class="pull-right hidden-xs showopacity">				
+					</a>
+					<ul class="dropdown-menu forAnimate" role="menu">
+						<li>
+							<a href="#">As image
+								<img src="./style/icons/download-img-icon.png" width="25px" class="pull-right hidden-xs showopacity">
+							</a>
+						</li>
+						<li class="divider"></li>
+						<li>
+							<a href="#">As Mesh
+								<img src="./style/icons/download-mesh-icon.png" width="25px" class="pull-right hidden-xs showopacity">
+							</a>
+						</li>
+					</ul>
+				</li>
+				
+			</ul>
+		</div>
+	</div>
+</nav>
+    
+</body>
+</html>
