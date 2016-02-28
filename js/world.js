@@ -1,5 +1,5 @@
 var world = new function() {
-	var scene, camera, renderer, cube, object, parent, light;
+	var scene, camera, renderer, object, parent;
 	var self = this;
 
 	this.canvas3d = null;
@@ -15,15 +15,11 @@ var world = new function() {
 		renderer = new THREE.WebGLRenderer({canvas: this.canvas3d});
 		renderer.setSize( this.canvas3d.width, this.canvas3d.height );
 
-		var geometry = new THREE.BoxGeometry( 1, 1, 1 );
-		var material = new THREE.MeshBasicMaterial( { color: 0xff0000 } );
-		cube = new THREE.Mesh( geometry, material );
-		//scene.add( cube );
-
 		camera.position.x = 0;
 		camera.position.y = 0;
 		camera.position.z = 2;
 
+		//create lighting
 		var light1 = new THREE.PointLight( 0xffefef, 1, 100 );
 		light1.position.set( 15, 15, 15 );
 		scene.add( light1 );
@@ -37,7 +33,6 @@ var world = new function() {
 
 	this.buildObject = function (contour, steiner, arrayDistance, triangles) {
 		var material = new THREE.MeshPhongMaterial( { color: 0xdddddd, specular: 0xffffff, shininess: 10, shading: THREE.SmoothShading, side: THREE.DoubleSide } );
-		//var material = new THREE.MeshBasicMaterial( { color: 0xf0f000 } );;
 		var geometry = new THREE.Geometry();
 
 		//create common contour
@@ -89,11 +84,15 @@ var world = new function() {
 		//for (var i = 0; i < geometry.vertices.length; i++) {
 		//	console.log(geometry.vertices[i]);
 		//};
+
+		//correct 
+		geometry.scale(1.0,-1.0,1.0);
 		
 		//So as to allow smooth shading
 		geometry.computeVertexNormals();
 
-		//geometry.computeBoundingSphere();
+		//Dunno
+		geometry.computeBoundingSphere();
 
 		object = new THREE.Mesh( geometry, material );
 		scene.add( object );
