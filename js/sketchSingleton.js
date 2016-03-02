@@ -144,6 +144,70 @@ var sketch = new function () {
     console.log("ArrayDistance1:",aD1);
   };
 
+  this.getDistanceVectorHope = function () {
+    console.log("Is it here?",this.steiner, this.contour);
+    this.arrayDistance = new Array(this.steiner.length);
+    this.arrayDistance.fill(-1);
+    var vectors = new Array(this.steiner.length);
+
+    //calculate the distance of every steiner point to all he segments on the border
+    for (var j = 0; j < this.steiner.length; j++) {
+        for (var i = 0; i < this.contour.length; i++) {
+          var index = (i == (this.contour.length-1)) ? 0 : i+1;
+          var distance = pointToSegmentHope(this.contour[i], this.contour[index], this.steiner[j]);
+          if (this.arrayDistance[j] == - 1 || this.arrayDistance[j] > distance.d) {
+            this.arrayDistance[j] = distance.d;
+            vectors[j] = distance.vector;
+          } 
+        };
+    };
+
+    console.log("DISTANCES", this.arrayDistance);
+    console.log("VECTORS", vectors);
+
+    for (var j = 0; j < this.steiner.length; j++) {
+        for (var i = 0; i < this.contour.length; i++) {
+          var index = (i == (this.contour.length-1)) ? 0 : i+1;
+          var distance = pointToSegmentHope(this.contour[i], this.contour[index], this.steiner[j]);
+          if (Math.abs(Math.sqrt(this.arrayDistance[j])-Math.sqrt(distance.d)) <= 1.0*(Number.EPSILON+this.pointDistance1)) {
+            if (dot(vectors[j].x, vectors[j].y, distance.vector.x, distance.vector.y)<0.0) {
+              var style = self.ctx.fillStyle;
+              self.ctx.fillStyle = "#FF00FF";
+              self.ctx.beginPath();
+              self.ctx.arc(this.steiner[j].x,this.steiner[j].y,6,0,2*Math.PI);
+              self.ctx.fill();
+              self.ctx.fillStyle = style;
+            };
+          } 
+        };
+    };
+
+    //for all pS: if arrayDistance[pS.id] < pointDistance: remove pS
+    /**/
+    this.steiner = this.steiner.filter( function (p) {
+      if (self.arrayDistance[p.id - 1] >= self.pointDistance) {
+       return true;
+     } else {
+      self.arrayDistance[p.id - 1] = -1;
+      return false;
+     }
+    });
+
+    for (var i = 0; i < this.steiner.length; i++) {
+      this.steiner[i].id = i+1+this.contour.length;
+    };
+
+    this.arrayDistance = this.arrayDistance.filter( function (d) {
+      return d != -1;
+    });
+    /**/
+
+    var aD1 = this.arrayDistance.map (function (p) {
+       return p;
+    });
+    console.log("ArrayDistance1:",aD1);
+  };
+
   this.debugInflate = function () {
     var maxDistance = 0;
     var minDistance = -1;
@@ -242,12 +306,14 @@ var sketch = new function () {
         if (odd) {
           fillPoints.push(point);
           self.steiner.push({x: i, y: j, id: (self.steiner.length + 1)});
+          /*
           var style = self.ctx.fillStyle;
           self.ctx.fillStyle = "#00F0A0";
           self.ctx.beginPath();
           self.ctx.arc(point[0],point[1],2,0,2*Math.PI);
           self.ctx.fill();
           self.ctx.fillStyle = style;
+          */
         }
       }
     }
@@ -256,7 +322,7 @@ var sketch = new function () {
   };
 
   function getMesh () {
-    self.getDistanceVector();
+    self.getDistanceVectorHope();
     
     var swctx = new poly2tri.SweepContext(self.contour);
     swctx.addPoints(self.steiner);
@@ -269,12 +335,14 @@ var sketch = new function () {
       });
       //console.log("X");
       //draw tri
+      /**/
       self.ctx.beginPath();
       self.ctx.moveTo(t.getPoint(0).x, t.getPoint(0).y);
       self.ctx.lineTo(t.getPoint(1).x, t.getPoint(1).y);
       self.ctx.lineTo(t.getPoint(2).x, t.getPoint(2).y);
       self.ctx.closePath();
       self.ctx.stroke();
+      /**/
     });
 
     //DEBUG START
@@ -301,7 +369,7 @@ var sketch = new function () {
     /**/
     //DEBUG END
     
-    self.debugInflate();
+    //self.debugInflate();
   };
 }
 
