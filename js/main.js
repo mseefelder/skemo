@@ -14,8 +14,8 @@ var main = new function () {
 
         document.addEventListener("mousemove", sketch.mouseMoveHandle, false);
         document.addEventListener("mousedown", sketch.mouseDownHandle, false);
-        document.addEventListener("mouseup", sketch.mouseUpHandle, false);
-        //document.addEventListener("mouseup", sketchToMesh, false);
+        //document.addEventListener("mouseup", sketch.mouseUpHandle, false);
+        document.addEventListener("mouseup", sketchToMesh, false);
         document.addEventListener("mouseout", sketch.mouseOutHandle, false);
     };
 

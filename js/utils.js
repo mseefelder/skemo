@@ -78,3 +78,32 @@ function findIntersection (aX, aY, bX, bY, cX, cY,dX, dY) {
 function dot (ax, ay, bx, by) {
   return (ax*bx)+(ay*by);
 }
+
+function bSearch (array, value) {
+  var l = array.length;
+  if (array[0] > value || array[l] < value) {
+    return false;
+  }
+  else if (array[0] == value || array[l] == value)
+  {
+    return true;
+  }
+  var curr = Math.floor(array.length/2.0);
+  var down = 0;
+  var up = l;
+  var prev = -1;
+  while(curr != prev) {
+    if (array[curr] == value) {
+      return true; 
+    } else if (array[curr] < value){
+      prev = curr;
+      down = curr;
+      curr = Math.floor((curr+up)/2.0);
+    } else if (array[curr] > value) {
+      prev = curr;
+      up = curr;
+      curr = Math.floor((curr+down)/2.0);
+    }
+  }
+  return false;
+}

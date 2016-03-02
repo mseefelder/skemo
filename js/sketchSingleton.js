@@ -26,6 +26,7 @@ var sketch = new function () {
   this.steiner = [];
   this.triangles = [];
   this.arrayDistance = null;
+  this.arrayMaxima = [];
   this.x = "black";
   this.y = 2;
 
@@ -145,50 +146,33 @@ var sketch = new function () {
   };
 
   this.getDistanceVectorHope = function () {
-    console.log("Is it here?",this.steiner, this.contour);
+    //console.log("Is it here?",this.steiner, this.contour);
     this.arrayDistance = new Array(this.steiner.length);
-    this.arrayDistance.fill(-1);
-    var vectors = new Array(this.steiner.length);
+
+    //console.log("DISTANCES", this.arrayDistance);
 
     //calculate the distance of every steiner point to all he segments on the border
     for (var j = 0; j < this.steiner.length; j++) {
+        this.arrayDistance[j] = {d: -1, v: {x:-1, y:-1}};
         for (var i = 0; i < this.contour.length; i++) {
           var index = (i == (this.contour.length-1)) ? 0 : i+1;
           var distance = pointToSegmentHope(this.contour[i], this.contour[index], this.steiner[j]);
-          if (this.arrayDistance[j] == - 1 || this.arrayDistance[j] > distance.d) {
-            this.arrayDistance[j] = distance.d;
-            vectors[j] = distance.vector;
+          if (this.arrayDistance[j].d == - 1 || this.arrayDistance[j].d > distance.d) {
+            this.arrayDistance[j].d = distance.d;
+            this.arrayDistance[j].v = distance.vector;
           } 
         };
     };
 
-    console.log("DISTANCES", this.arrayDistance);
-    console.log("VECTORS", vectors);
-
-    for (var j = 0; j < this.steiner.length; j++) {
-        for (var i = 0; i < this.contour.length; i++) {
-          var index = (i == (this.contour.length-1)) ? 0 : i+1;
-          var distance = pointToSegmentHope(this.contour[i], this.contour[index], this.steiner[j]);
-          if (Math.abs(Math.sqrt(this.arrayDistance[j])-Math.sqrt(distance.d)) <= 1.0*(Number.EPSILON+this.pointDistance1)) {
-            if (dot(vectors[j].x, vectors[j].y, distance.vector.x, distance.vector.y)<0.0) {
-              var style = self.ctx.fillStyle;
-              self.ctx.fillStyle = "#FF00FF";
-              self.ctx.beginPath();
-              self.ctx.arc(this.steiner[j].x,this.steiner[j].y,6,0,2*Math.PI);
-              self.ctx.fill();
-              self.ctx.fillStyle = style;
-            };
-          } 
-        };
-    };
+    //console.log("DISTANCES", this.arrayDistance);
 
     //for all pS: if arrayDistance[pS.id] < pointDistance: remove pS
     /**/
-    this.steiner = this.steiner.filter( function (p) {
-      if (self.arrayDistance[p.id - 1] >= self.pointDistance) {
+    this.steiner = this.steiner.filter( function (point) {
+      if (self.arrayDistance[point.id - 1].d >= (self.pointDistance/4.0)) {
        return true;
      } else {
-      self.arrayDistance[p.id - 1] = -1;
+      self.arrayDistance[point.id - 1].d = -1;
       return false;
      }
     });
@@ -197,33 +181,80 @@ var sketch = new function () {
       this.steiner[i].id = i+1+this.contour.length;
     };
 
-    this.arrayDistance = this.arrayDistance.filter( function (d) {
-      return d != -1;
+    this.arrayDistance = this.arrayDistance.filter( function (element) {
+      return element.d != -1;
     });
     /**/
 
-    var aD1 = this.arrayDistance.map (function (p) {
-       return p;
-    });
-    console.log("ArrayDistance1:",aD1);
+    //console.log("DISTANCES", this.arrayDistance);
+
+    for (var j = 0; j < this.steiner.length; j++) {
+        for (var i = 0; i < this.contour.length; i++) {
+          var index = (i == (this.contour.length-1)) ? 0 : i+1;
+          var distance = pointToSegmentHope(this.contour[i], this.contour[index], this.steiner[j]);
+          if (Math.abs(Math.sqrt(this.arrayDistance[j].d)-Math.sqrt(distance.d)) <= 1.0*(Number.EPSILON+this.pointDistance1)) {
+            if (dot(this.arrayDistance[j].v.x, this.arrayDistance[j].v.y, distance.vector.x, distance.vector.y)<0.0) {
+              this.arrayMaxima.push(j);
+
+              var style = self.ctx.fillStyle;
+              self.ctx.fillStyle = "#FF00FF";
+              self.ctx.beginPath();
+              self.ctx.arc(this.steiner[j].x,this.steiner[j].y,6,0,2*Math.PI);
+              self.ctx.fill();
+              self.ctx.fillStyle = style;
+
+              break;
+            };
+          } 
+        };
+    };
+
+    console.log("AMAX: ", this.arrayMaxima);
+
+    var min = 0;
+    var tempDist = 0;
+    //for each steiner point
+    for (var i = 0; i < this.arrayDistance.length; i++) {
+      //check if it isn't one of the local maxima
+      //if (bSearch(this.arrayMaxima, i)) continue;
+      if (this.arrayMaxima.includes(i)) continue;
+      //Now, we're going to find the local maximum closest to the point
+      //set a starting value for the distance and to wich index it refers
+      min = {dist: distance2(this.steiner[i].x, this.steiner[i].y, this.steiner[this.arrayMaxima[0]].x, this.steiner[this.arrayMaxima[0]].y),
+                  ind: 0};
+      tempDist = 0;
+      //Check distance to all maxima, storing the smallest
+      for (var j = 1; j < this.arrayMaxima.length; j++) {
+        tempDist = distance2(this.steiner[i].x, this.steiner[i].y, this.steiner[this.arrayMaxima[j]].x, this.steiner[this.arrayMaxima[j]].y);
+        if (min.dist > tempDist) {
+          min.dist = tempDist;
+          min.ind = j;
+        };
+      };
+      //based on the point's vector to the border, the local maximum and the distances, calculate inflation amount:
+      this.arrayDistance[i].d = Math.abs(this.arrayDistance[min.ind].d-min.dist);
+    };
+
+    console.log("DISTANCES", this.arrayDistance);
+
   };
 
   this.debugInflate = function () {
     var maxDistance = 0;
     var minDistance = -1;
     this.arrayDistance.map( function (d) {
-      if (d > maxDistance) {
-        maxDistance = d;
+      if (d.d > maxDistance) {
+        maxDistance = d.d;
       };
-      if (minDistance == -1 || minDistance > d) {
-        minDistance = d;
+      if (minDistance == -1 || minDistance > d.d) {
+        minDistance = d.d;
       };
     });
 
     maxDistance = maxDistance - minDistance;
 
     var normalArrayDistance = this.arrayDistance.map( function (d) {
-      return (d - minDistance) / maxDistance;
+      return (d.d - minDistance) / maxDistance;
     });
     console.log(normalArrayDistance);
     var style = this.ctx.fillStyle;
@@ -271,7 +302,7 @@ var sketch = new function () {
             self.prevY = self.currY;
             self.currX = e.clientX - $('#2dcanvas').offset().left;//$('nav').width();//canvas2d.offsetLeft;//
             self.currY = e.clientY - self.canvas2d.offsetTop;
-            console.log(e.clientX, self.currX, self.canvas2d.offsetTop);
+            //console.log(e.clientX, self.currX, self.canvas2d.offsetTop);
             self.draw();
         }
     }
@@ -328,13 +359,15 @@ var sketch = new function () {
     swctx.addPoints(self.steiner);
     swctx.triangulate();
     self.triangles = swctx.getTriangles();
+
+    //DEBUG START
+    /**/
     self.triangles.forEach(function(t) {
+      /**
       console.log("Triangle: ");
       t.getPoints().forEach(function(p) {
           console.log(p.x,p.y,p.id);
       });
-      //console.log("X");
-      //draw tri
       /**/
       self.ctx.beginPath();
       self.ctx.moveTo(t.getPoint(0).x, t.getPoint(0).y);
@@ -344,9 +377,9 @@ var sketch = new function () {
       self.ctx.stroke();
       /**/
     });
-
-    //DEBUG START
     /**/
+
+    /**
     var allPoints = new Array(self.contour.length+self.steiner.length);
     allPoints.fill(-1);
     self.triangles.forEach(function(t) {

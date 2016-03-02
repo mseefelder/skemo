@@ -36,7 +36,7 @@ var world = new function() {
 		var geometry = new THREE.Geometry();
 
 		//create common contour
-		console.log("Vertices:");
+		//console.log("Vertices:");
 		for (var i = 0; i < contour.length; i++) {
 			//console.log(contour[i].x,  contour[i].y, 0);
 			geometry.vertices.push(
@@ -48,7 +48,7 @@ var world = new function() {
 		for (var i = 0; i < steiner.length; i++) {
 			//console.log(steiner[i].x,  steiner[i].y, arrayDistance[i]);
 			geometry.vertices.push(
-				new THREE.Vector3( steiner[i].x,  steiner[i].y, Math.sqrt(arrayDistance[i]) )
+				new THREE.Vector3( steiner[i].x,  steiner[i].y, Math.sqrt(arrayDistance[i].d) )
 			);
 		};
 
@@ -56,16 +56,16 @@ var world = new function() {
 		for (var i = 0; i < steiner.length; i++) {
 			//console.log(steiner[i].x,  steiner[i].y, arrayDistance[i]);
 			geometry.vertices.push(
-				new THREE.Vector3( steiner[i].x,  steiner[i].y, -1.0*Math.sqrt(arrayDistance[i]) )
+				new THREE.Vector3( steiner[i].x,  steiner[i].y, -1.0*Math.sqrt(arrayDistance[i].d) )
 			);
 		};
 
-		console.log("Faces");
+		//console.log("Faces");
 		var cl = contour.length;
 		var sl = steiner.length;
 		
 		for (var i = 0; i < triangles.length; i++) {
-			console.log(triangles[i].getPoint(0).id, triangles[i].getPoint(1).id, triangles[i].getPoint(2).id);
+			//console.log(triangles[i].getPoint(0).id, triangles[i].getPoint(1).id, triangles[i].getPoint(2).id);
 			//create front faces
 			geometry.faces.push( new THREE.Face3( triangles[i].getPoint(0).id-1, triangles[i].getPoint(1).id-1, triangles[i].getPoint(2).id-1 ) );
 
@@ -73,7 +73,7 @@ var world = new function() {
 			var a = ((triangles[i].getPoint(0).id-1)>=cl)?(triangles[i].getPoint(0).id-1+sl):(triangles[i].getPoint(0).id-1);
 			var b = ((triangles[i].getPoint(1).id-1)>=cl)?(triangles[i].getPoint(1).id-1+sl):(triangles[i].getPoint(1).id-1);
 			var c = ((triangles[i].getPoint(2).id-1)>=cl)?(triangles[i].getPoint(2).id-1+sl):(triangles[i].getPoint(2).id-1);
-			console.log(a, b, c);
+			//console.log(a, b, c);
 			geometry.faces.push( new THREE.Face3( a, b, c ) );
 		};
 
