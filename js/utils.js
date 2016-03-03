@@ -16,6 +16,10 @@ function distance2  (aX, aY, bX, bY){
   return (aX - bX)*(aX - bX) + (aY - bY)*(aY - bY);
 }
 
+function distance1 (aX, aY, bX, bY){
+  return Math.sqrt(distance2(aX, aY, bX, bY));
+}
+
 function ccw (aX, aY, bX, bY, cX, cY) {
   return (cY-aY)*(bX-aX) > (bY-aY)*(cX-aX);
 }
@@ -27,9 +31,13 @@ function intersect (aX, aY, bX, bY, cX, cY,dX, dY) {
 }
 
 function pointToSegment (a, b, p) {
+  //vector from p to a
   var vecP = [p.x-a.x, p.y-a.y];
+  //vector from p to b
   var vecR = [b.x-a.x, b.y-a.y];
+  //Length of vecR
   var lenVecR = Math.sqrt(vecR[0]*vecR[0]+vecR[1]*vecR[1]);
+  //Length of vecP projection onto vecR
   var lenProj = vecP[0]*(vecR[0]/lenVecR) + vecP[1]*(vecR[1]/lenVecR);
   if (lenProj <= 0) { //closer to a
     return distance2(p.x,p.y,a.x,a.y);
@@ -57,6 +65,13 @@ function pointToSegmentHope (a, b, p) {
       }
     };
   }
+}
+
+function normalizedProjectionLength (ax,ay,bx,by) {
+  var p = dot(ax,ay,bx,by);
+  p = p/distance1(ax,ay,0,0);
+  p = p/distance1(bx,by,0,0);
+  return p;
 }
 
 function findIntersection (aX, aY, bX, bY, cX, cY,dX, dY) {
