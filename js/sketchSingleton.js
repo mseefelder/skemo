@@ -18,7 +18,7 @@ var sketch = new function () {
   this.minY = 0;
   this.dot_flag = false;
   this.borderVertices = [];
-  this.pointDistance = 16;
+  this.pointDistance = 100;
   this.pointDistance1 = Math.sqrt(this.pointDistance);
   //mesh points.
   this.borderPoints = [];
@@ -768,6 +768,9 @@ var sketch = new function () {
   };
 
   function fillBorderHex  (maxPointX,minPointX, maxPointY,minPointY , borderVertices) {
+
+    smoothContour();
+
     var odd = false;
     var fillPoints = [];
     var upMove = Math.sqrt(3)*self.pointDistance1;
@@ -849,7 +852,18 @@ var sketch = new function () {
     return fillPoints;
   };
 
-  function smoothMesh() {
+  function smoothContour() {
+    var smoothContour = new Array(self.contour.length);
+    var next = 0;
+    var prev = 0;
+    for (var i = 0; i < self.contour.length; i++) {
+      next = (i == (self.contour.length-1)) ? 0 : i+1;
+      prev = (i == 0) ? (self.contour.length-1) : i-1;
+      smoothContour[i] = (self.contour[i]+self.contour[next]+self.contour[prev])/3.0;
+    };
+  }
+
+  function smoothSteiner() {
     //smooth mesh with neighbour structures
     var smoothSteiner = new Array(this.steiner);
     var weightSteiner = new Array(this.steiner);
@@ -891,6 +905,85 @@ var sketch = new function () {
     //console.log(smoothSteiner, weightSteiner);
   };
 
+  function smoothMesh() {
+    //smooth mesh with neighbour structures
+    var smoothSteiner = new Array(this.steiner);
+    var weightSteiner = new Array(this.steiner);
+    for (var i = 0; i < self.arrayDistance.length; i++) {
+      smoothSteiner[i] = self.arrayDistance[i].d;
+      weightSteiner[i] = 1.0;
+    };
+
+    var smoothContour = new Array(self.contour.length);
+    var weightContour = new Array(self.contour.length);
+    for (var i = 0; i < self.contour.length; i++) {
+      smoothContour[i] = {x: self.contour[i].x, y: self.contour[i].y};
+      weightContour[i] = 1.0;
+    };
+
+    var cl = self.contour.length;
+    var sl = self.steiner.length;
+
+    for (var i = 0; i < self.triangles.length; i++) {
+      var verts = self.triangles[i].getPoints();
+      if (verts[0].id > cl) {
+        smoothSteiner[verts[0].id-cl-1] += (verts[1].id > cl) ? self.arrayDistance[verts[1].id-cl-1].d : 0.0;
+        smoothSteiner[verts[0].id-cl-1] += (verts[2].id > cl) ? self.arrayDistance[verts[2].id-cl-1].d : 0.0;
+        weightSteiner[verts[0].id-cl-1] += 2.0;
+      } else {
+        smoothContour[verts[0].id-1].x += (verts[1].id > cl) ? self.steiner[verts[1].id-cl-1].x : self.contour[verts[1].id-1].x;
+        smoothContour[verts[0].id-1].y += (verts[1].id > cl) ? self.steiner[verts[1].id-cl-1].y : self.contour[verts[1].id-1].y;
+        smoothContour[verts[0].id-1].x += (verts[2].id > cl) ? self.steiner[verts[2].id-cl-1].x : self.contour[verts[2].id-1].x;
+        smoothContour[verts[0].id-1].y += (verts[2].id > cl) ? self.steiner[verts[2].id-cl-1].y : self.contour[verts[2].id-1].y;
+        weightContour += 2.0;
+      };
+      if (verts[1].id > cl) {
+        smoothSteiner[verts[1].id-cl-1] += (verts[0].id > cl) ? self.arrayDistance[verts[0].id-cl-1].d : 0.0;
+        smoothSteiner[verts[1].id-cl-1] += (verts[2].id > cl) ? self.arrayDistance[verts[2].id-cl-1].d : 0.0;
+        weightSteiner[verts[1].id-cl-1] += 2.0;
+      } else {
+        smoothContour[verts[1].id-1].x += (verts[0].id > cl) ? self.steiner[verts[0].id-cl-1].x : self.contour[verts[0].id-1].x;
+        smoothContour[verts[1].id-1].y += (verts[0].id > cl) ? self.steiner[verts[0].id-cl-1].y : self.contour[verts[0].id-1].y;
+        smoothContour[verts[1].id-1].x += (verts[2].id > cl) ? self.steiner[verts[2].id-cl-1].x : self.contour[verts[2].id-1].x;
+        smoothContour[verts[1].id-1].y += (verts[2].id > cl) ? self.steiner[verts[2].id-cl-1].y : self.contour[verts[2].id-1].y;
+        weightContour += 2.0;
+      };
+      if (verts[2].id > cl) {
+        smoothSteiner[verts[2].id-cl-1] += (verts[1].id > cl) ? self.arrayDistance[verts[1].id-cl-1].d : 0.0;
+        smoothSteiner[verts[2].id-cl-1] += (verts[0].id > cl) ? self.arrayDistance[verts[0].id-cl-1].d : 0.0;
+        weightSteiner[verts[2].id-cl-1] += 2.0;
+
+      } else {
+        smoothContour[verts[2].id-1].x += (verts[0].id > cl) ? self.steiner[verts[0].id-cl-1].x : self.contour[verts[0].id-1].x;
+        smoothContour[verts[2].id-1].y += (verts[0].id > cl) ? self.steiner[verts[0].id-cl-1].y : self.contour[verts[0].id-1].y;
+        smoothContour[verts[2].id-1].x += (verts[1].id > cl) ? self.steiner[verts[1].id-cl-1].x : self.contour[verts[1].id-1].x;
+        smoothContour[verts[2].id-1].y += (verts[1].id > cl) ? self.steiner[verts[1].id-cl-1].y : self.contour[verts[1].id-1].y;
+        weightContour += 2.0;
+      };
+    };
+
+    for (var i = 0; i < self.arrayDistance.length; i++) {
+      self.arrayDistance[i].d = smoothSteiner[i]/weightSteiner[i];
+      if (Number.isNaN(self.arrayDistance[i].d)) {
+        self.arrayDistance[i].d = 0.0;
+      };
+    };
+
+    for (var i = 0; i < self.contour.length; i++) {
+      self.contour[i].x = smoothContour[i].x/weightContour[i];
+      self.contour[i].y = smoothContour[i].y/weightContour[i];
+      if (Number.isNaN(self.contour[i].x)) {
+        self.contour[i].x = 0.0;
+      };
+      if (Number.isNaN(self.contour[i].y)) {
+        self.contour[i].y = 0.0;
+      };
+    };
+
+    //console.log("arrayDistance: ", self.arrayDistance)
+    //console.log(smoothSteiner, weightSteiner);
+  };
+
   function getMesh () {
     //self.getDistanceVector();
     //self.getDistanceVectorHope();
@@ -903,10 +996,10 @@ var sketch = new function () {
     swctx.triangulate();
     self.triangles = swctx.getTriangles();
 
-    smoothMesh();
-    smoothMesh();
-    smoothMesh();
-    smoothMesh();
+    smoothSteiner();
+    //smoothMesh();
+    smoothSteiner();
+    //smoothMesh();
 
     //DEBUG START
     /**/
