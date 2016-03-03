@@ -26,10 +26,15 @@ var main = new function () {
     //Function to be called on sketching mouseup to create mesh
     function sketchToMesh (e,sketch) {
         sketch.mouseUpHandle(e);
-        world.buildObject(sketch.contour, sketch.steiner, sketch.arrayDistance, sketch.triangles);
-        displaying = sketch.canvas2d.style.display;
-        sketch.canvas2d.style.display = "none";
-        world.canvas3d.style.display = "block";
+        if(world.canvas3d.style.display == 'none') {
+	    if(sketch.proportion.y) {
+		world.proportion = {y: sketch.proportion.y, h:sketch.h, w: sketch.w};
+	    }
+            world.buildObject(sketch.contour, sketch.steiner, sketch.arrayDistance, sketch.triangles);
+            displaying = sketch.canvas2d.style.display;
+            sketch.canvas2d.style.display = "none";
+            world.canvas3d.style.display = "block";
+        }
     };
 }
 
@@ -39,6 +44,7 @@ $(document).ready(function () {
     var canvas3d = document.getElementById('3dcanvas');
 
     $('#edit').on('click', function() {
+        console.log("asdasdasdf");
         if(canvas2d.style.display == "none") {
             canvas2d.style.display = 'block';
             canvas3d.style.display = 'none';
@@ -50,5 +56,19 @@ $(document).ready(function () {
             canvas3d.style.display = 'block';
             canvas2d.style.display = "none"; 
         }
+    });
+
+    $('#translate').on('click', function() {
+        var canvas2d = document.getElementById('2dcanvas');
+        var canvas3d = document.getElementById('3dcanvas');
+        canvas2d.style.display == 'none';
+        canvas3d.style.display = 'block';
+        console.log(world.isDragging);
+        document.addEventListener('mousemove', world.onMouseMove, false);
+
+        document.addEventListener('mousedown',world.onMouseDown,false);
+        document.addEventListener('mouseup',world.onMouseUp,false);
+
+
     });
 })
