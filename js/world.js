@@ -32,7 +32,7 @@ var world = new function() {
 	}
 
 	this.buildObject = function (contour, steiner, arrayDistance, triangles) {
-		var material = new THREE.MeshPhongMaterial( { color: 0xdddddd, specular: 0xffffff, shininess: 10, shading: THREE.SmoothShading, side: THREE.DoubleSide } );
+		var material = new THREE.MeshPhongMaterial( { color: 0xdddddd, specular: 0xffffff, shininess: 10, shading: THREE.SmoothShading, side: THREE.DoubleSide, wireframe: false } );
 		var geometry = new THREE.Geometry();
 
 		//create common contour
@@ -48,7 +48,7 @@ var world = new function() {
 		for (var i = 0; i < steiner.length; i++) {
 			//console.log(steiner[i].x,  steiner[i].y, arrayDistance[i]);
 			geometry.vertices.push(
-				new THREE.Vector3( steiner[i].x,  steiner[i].y, Math.sqrt(arrayDistance[i].d) )
+				new THREE.Vector3( steiner[i].x,  steiner[i].y, arrayDistance[i].d )//Math.sqrt(arrayDistance[i].d) )
 			);
 		};
 
@@ -56,7 +56,7 @@ var world = new function() {
 		for (var i = 0; i < steiner.length; i++) {
 			//console.log(steiner[i].x,  steiner[i].y, arrayDistance[i]);
 			geometry.vertices.push(
-				new THREE.Vector3( steiner[i].x,  steiner[i].y, -1.0*Math.sqrt(arrayDistance[i].d) )
+				new THREE.Vector3( steiner[i].x,  steiner[i].y, -1.0*arrayDistance[i].d )//-1.0*Math.sqrt(arrayDistance[i].d) )
 			);
 		};
 
@@ -103,7 +103,7 @@ var world = new function() {
 		requestAnimationFrame( render );
 
 		if (object) {
-			object.rotation.y += 0.05;
+			object.rotation.y += 0.005;
 		}
 			
 		//cube.rotation.x += 0.1;
