@@ -160,40 +160,47 @@ var world = new function() {
 			selected.p = intersect[0].point;
 			console.log(translateVector,intersect[0].point, selected.p);
 		}
-		if(!self.isDragging) {
-			var deltaRotationQuaternion =  new THREE.Quaternion()
-			.setFromEuler(new THREE.Euler(
-				toRadians(deltaMove.y * 1),
-				toRadians(deltaMove.x * 1),
-				0,
-				'XYZ'
-				));
-			var object = intersects[0];
-        object.quaternion.multiplyQuaternions(deltaRotationQuaternion, object.quaternion);
-		}
 		previousMousePosition = { x: event.clientX, y: event.clientY};
 	}
 
 	this.onMouseDown = function(e) {
-		console.log('entrei');
-
 		raycaster.setFromCamera(mouse,camera);
 		var abelha = raycaster.intersectObjects(objects);
 		//{ distance, point, face, faceIndex, indices, object }
-		selected.obj =  abelha[0].object;
-		selected.p = abelha[0].point;
+		if(abelha.length > 0){
+			selected.obj =  abelha[0].object;
+			selected.p = abelha[0].point;
 
-		console.log( abelha, selected.obj, camera, mouse);
-		
-		var vector =  new THREE.Vector3(0,0,20);
-		plane.position.copy(selected.p);
-		plane.lookAt(plane.position.x, plane.position.y, 100);
-        self.isDragging = true;
+			console.log( abelha, selected.obj, camera, mouse);
+			
+			var vector =  new THREE.Vector3(0,0,20);
+			plane.position.copy(selected.p);
+			plane.lookAt(plane.position.x, plane.position.y, 100);
+	        self.isDragging = true;
+       	}
 	}
 
 	this.onMouseUp =  function(e) {
         self.isDragging = false;
       }
+
+    this.onDelete =  function(e) {
+    	raycaster.setFromCamera(mouse,camera);
+		var intersec_delete = raycaster.intersectObjects(objects);
+		if(intersec_delete.length > 0) {
+			console.log(intersec_delete);
+			for(var i = 0; i < objects.length; i++ ){
+				if(intersec_delete[0].object.id == objects[i].id){
+					console.log('entrei');
+					objects.splice(i,1);
+					scene.remove(intersec_delete[0].object);
+				}
+			}
+			console.log(objects);
+			render();
+		}
+    }
+
 
 	function toRadians (degrees) {
         return degrees * (Math.PI/180);
