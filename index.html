@@ -21,7 +21,7 @@
 
 
 
-<body onload="main.init()" style="overflow: hidden; display: block; margin: 0px;">
+<body onload="" style="overflow: hidden; display: block; margin: 0px;">
 
 <div class="main off-canvas-menu">
 	<canvas id="2dcanvas"></canvas>
@@ -44,27 +44,27 @@
 		<!-- Collect the nav links, forms, and other content for toggling -->
 		<div class="" id="bs-sidebar-navbar-collapse-1">
 			<ul class="nav navbar-nav">
-				<li class="active">
+				<li id="edit">
 					<a href="#">Edit 
 						<img src="./style/icons/edit-icon.png" width="25px" class="pull-right hidden-xs showopacity">
 					</a>
 				</li>
-				<li >
+				<li id="manipulate">
 					<a href="#">Manipulate 
 						<img src="./style/icons/manipulate-icon.png" width="25px" class="pull-right hidden-xs showopacity">
 					</a>
 				</li>
-				<li >
+				<li id="delete">
 					<a href="#">Delete 
 						<img src="./style/icons/delete-icon.png" width="25px" class="pull-right hidden-xs showopacity">
 					</a>
 				</li>
-				<li >
+				<li id="rotate">
 					<a href="#">Rotate 
 						<img src="./style/icons/rotate-icon.png" width="25px" class="pull-right hidden-xs showopacity">
 					</a>
 				</li>
-				<li >
+				<li id="translate">
 					<a href="#">Translate 
 						<img src="./style/icons/translate-icon.png" width="25px" class="pull-right hidden-xs showopacity">
 					</a>
@@ -74,13 +74,13 @@
 						<img src="./style/icons/download-button.png" width="25px" class="pull-right hidden-xs showopacity">				
 					</a>
 					<ul class="dropdown-menu forAnimate" role="menu">
-						<li>
+						<li id="d_image">
 							<a href="#">As image
 								<img src="./style/icons/download-img-icon.png" width="25px" class="pull-right hidden-xs showopacity">
 							</a>
 						</li>
 						<li class="divider"></li>
-						<li>
+						<li id="d_mesh">
 							<a href="#">As Mesh
 								<img src="./style/icons/download-mesh-icon.png" width="25px" class="pull-right hidden-xs showopacity">
 							</a>

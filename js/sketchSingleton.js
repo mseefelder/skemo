@@ -1,4 +1,4 @@
-var sketch = new function () {
+var sketch = function () {
 
   var self = this;
   var parent = null;
@@ -29,6 +29,7 @@ var sketch = new function () {
   this.arrayMaxima = [];
   this.x = "black";
   this.y = 2;
+  this.proportion = {x: 0, y: 0};
 
   this.init2d = function (p, canvas) {
     parent = p;
@@ -37,26 +38,40 @@ var sketch = new function () {
     fullCanvas(this.canvas2d);
     this.w = this.canvas2d.width;
     this.h = this.canvas2d.height;
-    console.log("init", this.w, this.h);
+
+    this.ctx.clearRect(0, 0, this.w, this.h);
+    self.borderPoints = [];
+    self.contour = [];
+    self.steiner = [];
+    self.triangles = [];
+    self.arrayDistance = null;
+    self.borderVertices = [];
+    //console.log("init", this.w, this.h);
   };
 
   this.mouseMoveHandle = function (e) {
-    findxy('move', e);
+    if(self.canvas2d.style.display != 'none') {
+      findxy('move', e);
+    }
   };
 
   this.mouseDownHandle = function (e) {
-    findxy('down', e);
+    if(self.canvas2d.style.display != 'none') {
+      findxy('down', e);
+    }
   };
 
   this.mouseUpHandle = function (e) {
-    findxy('up', e);
-    //fillBorderBruteForce(self.maxX, self.minX, self.maxY, self.minY, self.borderVertices);
-    fillBorderHex(self.maxX, self.minX, self.maxY, self.minY, self.borderVertices);
-    getMesh();
+    if(self.canvas2d.style.display != 'none') {
+      findxy('up', e);
+      fillBorderBruteForce(self.maxX, self.minX, self.maxY, self.minY, self.borderVertices);
+      getMesh();
+      self.proportion = {x: (self.maxX - self.minX)/self.w, y: (self.maxY - self.minY)/self.h};
+    }
   };
 
   this.mouseOutHandle = function (e) {
-    findxy('out', e);
+      findxy('out', e);
   };
 
   this.draw = function () {
@@ -103,7 +118,7 @@ var sketch = new function () {
   };
 
   this.getDistanceVector = function () {
-    console.log("Is it here?",this.steiner, this.contour);
+    //console.log("Is it here?",this.steiner, this.contour);
     this.arrayDistance = new Array(this.steiner.length);
     this.arrayDistance.fill(-1);
 
@@ -147,7 +162,7 @@ var sketch = new function () {
     var aD1 = this.arrayDistance.map (function (p) {
        return p;
     });
-    console.log("ArrayDistance1:",aD1);
+    //console.log("ArrayDistance1:",aD1);
   };
 
   //after this function is called:
@@ -1007,7 +1022,7 @@ var sketch = new function () {
       /**
       console.log("Triangle: ");
       t.getPoints().forEach(function(p) {
-          console.log(p.x,p.y,p.id);
+          //console.log(p.x,p.y,p.id);
       });
       /**
       self.ctx.beginPath();
@@ -1028,17 +1043,17 @@ var sketch = new function () {
           allPoints[p.id-1] = {x: p.x, y:p.y, id:p.id};
       });
     });
-    console.log("All Points:");
+    //console.log("All Points:");
     for (var i = 0; i < allPoints.length; i++) {
-      console.log(allPoints[i].x, allPoints[i].y, allPoints[i].id);
+      //console.log(allPoints[i].x, allPoints[i].y, allPoints[i].id);
     };
-    console.log("Contour");
+    //console.log("Contour");
     for (var i = 0; i < self.contour.length; i++) {
-      console.log(self.contour[i].x, self.contour[i].y, self.contour[i].id);
+      //console.log(self.contour[i].x, self.contour[i].y, self.contour[i].id);
     };
-    console.log("Steiner");
+    //console.log("Steiner");
     for (var i = 0; i < self.steiner.length; i++) {
-      console.log(self.steiner[i].x, self.steiner[i].y, self.steiner[i].id);
+      //console.log(self.steiner[i].x, self.steiner[i].y, self.steiner[i].id);
     };
     /**/
     //DEBUG END
