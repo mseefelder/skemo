@@ -48,7 +48,7 @@ var world = new function() {
 		for (var i = 0; i < steiner.length; i++) {
 			//console.log(steiner[i].x,  steiner[i].y, arrayDistance[i]);
 			geometry.vertices.push(
-				new THREE.Vector3( steiner[i].x,  steiner[i].y, Math.sqrt(arrayDistance[i]) )
+				new THREE.Vector3( steiner[i].x,  steiner[i].y, Math.sqrt(arrayDistance[i].d) )
 			);
 		};
 
@@ -56,7 +56,7 @@ var world = new function() {
 		for (var i = 0; i < steiner.length; i++) {
 			//console.log(steiner[i].x,  steiner[i].y, arrayDistance[i]);
 			geometry.vertices.push(
-				new THREE.Vector3( steiner[i].x,  steiner[i].y, -1.0*Math.sqrt(arrayDistance[i]) )
+				new THREE.Vector3( steiner[i].x,  steiner[i].y, -1.0*Math.sqrt(arrayDistance[i].d) )
 			);
 		};
 
@@ -98,6 +98,8 @@ var world = new function() {
 		scene.add( object );
 
 	};
+
+	var smoothGeometry
 
 	var render = function () {
 		requestAnimationFrame( render );
