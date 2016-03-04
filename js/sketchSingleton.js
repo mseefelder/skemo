@@ -64,7 +64,7 @@ var sketch = function () {
   this.mouseUpHandle = function (e) {
     if(self.canvas2d.style.display != 'none') {
       findxy('up', e);
-      fillBorderBruteForce(self.maxX, self.minX, self.maxY, self.minY, self.borderVertices);
+      fillBorderHex(self.maxX, self.minX, self.maxY, self.minY, self.borderVertices);
       getMesh();
       self.proportion = {x: (self.maxX - self.minX)/self.w, y: (self.maxY - self.minY)/self.h};
     }
