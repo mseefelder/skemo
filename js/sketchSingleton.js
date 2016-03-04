@@ -1011,9 +1011,9 @@ var sketch = function () {
     swctx.triangulate();
     self.triangles = swctx.getTriangles();
 
-    smoothSteiner();
-    //smoothMesh();
-    smoothSteiner();
+    //smoothSteiner();
+    smoothMesh();
+    //smoothSteiner();
     //smoothMesh();
 
     //DEBUG START

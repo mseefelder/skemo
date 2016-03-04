@@ -17,7 +17,7 @@ var main = new function () {
         document.addEventListener("mousemove", sketch1.mouseMoveHandle, false);
         document.addEventListener("mousedown", sketch1.mouseDownHandle, false);
         //document.addEventListener("mouseup", sketch.mouseUpHandle, false);
-        document.addEventListener("mouseup",function(){
+        document.addEventListener("mouseup",function( event ){
           sketchToMesh(event, sketch1); 
         } , false);
         canvas3d.addEventListener("mouseout", sketch1.mouseOutHandle, false);

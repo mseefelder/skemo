@@ -158,9 +158,9 @@ var world = new function() {
 			translateVector.subVectors(intersect[0].point, selected.p);
 			selected.obj.translateX(translateVector.x).translateY(translateVector.y).translateZ(translateVector.z);
 			selected.p = intersect[0].point;
-			console.log(translateVector,intersect[0].point, selected.p);
+			//console.log(translateVector,intersect[0].point, selected.p);
 		}
-		if(!self.isDragging) {
+		if(!self.isDragging && intersects) {
 			var deltaRotationQuaternion =  new THREE.Quaternion()
 			.setFromEuler(new THREE.Euler(
 				toRadians(deltaMove.y * 1),
@@ -171,24 +171,26 @@ var world = new function() {
 			var object = intersects[0];
         object.quaternion.multiplyQuaternions(deltaRotationQuaternion, object.quaternion);
 		}
-		previousMousePosition = { x: event.clientX, y: event.clientY};
+		previousMousePosition = { x: e.clientX, y: e.clientY};
 	}
 
 	this.onMouseDown = function(e) {
 		console.log('entrei');
 
 		raycaster.setFromCamera(mouse,camera);
-		var abelha = raycaster.intersectObjects(objects);
-		//{ distance, point, face, faceIndex, indices, object }
-		selected.obj =  abelha[0].object;
-		selected.p = abelha[0].point;
+		var intersection = raycaster.intersectObjects(objects);
+		if (intersection) {
+			//{ distance, point, face, faceIndex, indices, object }
+			selected.obj =  intersection[0].object;
+			selected.p = intersection[0].point;
 
-		console.log( abelha, selected.obj, camera, mouse);
-		
-		var vector =  new THREE.Vector3(0,0,20);
-		plane.position.copy(selected.p);
-		plane.lookAt(plane.position.x, plane.position.y, 100);
-        self.isDragging = true;
+			console.log( intersection, selected.obj, camera, mouse);
+			
+			var vector =  new THREE.Vector3(0,0,20);
+			plane.position.copy(selected.p);
+			plane.lookAt(plane.position.x, plane.position.y, 100);
+	        self.isDragging = true;
+		};
 	}
 
 	this.onMouseUp =  function(e) {
