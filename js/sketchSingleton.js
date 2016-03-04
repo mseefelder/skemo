@@ -117,8 +117,7 @@ var sketch = function () {
     self.contour.push({x:valueX, y:valueY, id:(self.contour.length+1)});
   };
 
-  this.getDistanceVectorHopeSmooth = function () {
-    console.log("Is it here?",self.steiner, self.contour);
+  this.getDistanceVector = function () {
     self.arrayDistance = new Array(self.steiner.length);
 
 
@@ -134,8 +133,6 @@ var sketch = function () {
           } 
         };
     };
-
-    console.log("DISTANCES", self.arrayDistance);
 
     //for all pS: if arrayDistance[pS.id] < pointDistance: remove pS
     self.steiner = self.steiner.filter( function (point) {
@@ -162,8 +159,6 @@ var sketch = function () {
       return {d: Math.sqrt(element.d), v: element.v};
     } );
 
-    console.log("DISTANCES", self.arrayDistance);
-
     /**/
 
     for (var j = 0; j < self.steiner.length; j++) {
@@ -178,9 +173,6 @@ var sketch = function () {
           } 
         };
     };
-
-    console.log("DISTANCES", self.arrayDistance);
-    console.log("MAXIMA", self.arrayMaxima);
     /**/
 
     //Smooth each maximum with its neighbouring maximum (that lie inside its radius of distance)
@@ -198,7 +190,7 @@ var sketch = function () {
       //tempRadius = (self.arrayDistance[self.arrayMaxima[i]].d+Number.EPSILON+self.pointDistance1);
       //check neighbours
       for (var j = 0; j < self.arrayMaxima.length; j++) {
-        console.log("j", j);
+        //console.log("j", j);
         tempDist = distance1(self.steiner[self.arrayMaxima[i]].x, self.steiner[self.arrayMaxima[i]].y, self.steiner[self.arrayMaxima[j]].x, self.steiner[self.arrayMaxima[j]].y);
         if(i != j && tempDist < self.arrayDistance[self.arrayMaxima[i]].d ) {//tempRadius ) {
           tempWeight = (Math.sqrt((self.arrayDistance[self.arrayMaxima[i]].d*self.arrayDistance[self.arrayMaxima[i]].d)-(tempDist*tempDist)))/self.arrayDistance[self.arrayMaxima[i]].d;
@@ -211,9 +203,6 @@ var sketch = function () {
       smoothHeight[i] = smoothHeight[i]/accumWeight;
 
     };
-
-    console.log("DISTANCES", self.arrayDistance);
-    console.log("smoothHeight", smoothHeight);
     /**/
 
     var smoothAll = new Array(self.arrayDistance);
@@ -244,10 +233,6 @@ var sketch = function () {
       };
       
     };
-
-    console.log("DISTANCES", self.arrayDistance);
-    console.log("smoothAll", smoothAll);
-    console.log("weightAll", weightAll);
     /**/
 
     //inflation smoothing
@@ -257,8 +242,6 @@ var sketch = function () {
         self.arrayDistance[i].d = 0.0;
       };
     };
-
-    console.log("DISTANCES", self.arrayDistance);
     /**/
 
   };
@@ -587,7 +570,7 @@ var sketch = function () {
   };
 
   function getMesh () {
-    self.getDistanceVectorHopeSmooth();
+    self.getDistanceVector();
 
     
     var swctx = new poly2tri.SweepContext(self.contour);

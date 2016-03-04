@@ -1,5 +1,5 @@
 var world = new function() {
-	var scene, camera, renderer, parent, plane;
+	var scene, camera, renderer, parent, plane, sphere;
 	var objects = new Array();
 	var raycaster = new THREE.Raycaster();
 	var mouse = new THREE.Vector2(); 
@@ -15,10 +15,13 @@ var world = new function() {
 	this.init3d = function (p, canvas) {
 		parent = p;
 		this.canvas3d = canvas;//document.getElementById('3dcanvas');
+
 		fullCanvas(this.canvas3d);
-	        console.log(this.canvas3d.width);
+	        //console.log(this.canvas3d.width);
 	        this.canvas3d.width -= $('#3dcanvas').offset().left;
-	        console.log(this.canvas3d.width);
+	        //console.log(this.canvas3d.width);
+	    size = { w: this.canvas3d.width, h:this.canvas3d.height};
+
 		scene = new THREE.Scene();
 		camera = new THREE.PerspectiveCamera( 75, this.canvas3d.width/this.canvas3d.height, 0.1, 1000 );
 		//camera = new THREE.OrthographicCamera( this.canvas3d.width / - 2, this.canvas3d.width / 2, this.canvas3d.height / 2, this.canvas3d.height / - 2, 1, 1000 );
@@ -31,15 +34,15 @@ var world = new function() {
 		camera.position.z = 2;
 
 		//create lighting
-		var light1 = new THREE.PointLight( 0xffefef, 1, 100 );
+		var light1 = new THREE.PointLight( 0xffefef, 0.5, 100 );
 		light1.position.set( 15, 15, 15 );
 		scene.add( light1 );
 
-		var light2 = new THREE.PointLight( 0xefefff, 1, 100 );
+		var light2 = new THREE.PointLight( 0xefefff, 0.5, 100 );
 		light2.position.set( -15, 15, 15 );
 		scene.add( light2 );
 
-		plane =  new THREE.Mesh(new THREE.PlaneBufferGeometry(this.canvas3d.width, this.canvas3d.height,8,8), new THREE.MeshBasicMaterial({color: 0xffffff,
+		plane =  new THREE.Mesh(new THREE.PlaneBufferGeometry(this.canvas3d.width, this.canvas3d.height,8,8), new THREE.MeshBasicMaterial({color: 0xff0000,
 		 transparent: true, opacity: 0}));
 		scene.add(plane);
 		plane.position.set(size.w,size.h,0);
@@ -94,23 +97,18 @@ var world = new function() {
 			geometry.faces.push( new THREE.Face3( a, b, c ) );
 		};
 
-		//To set model in [-1,1] sphere
-	        //geometry.normalize();
-	        var rad = 75.0 * Math.PI/180;
-	        var width_scene  = 2 * ((1.0/Math.abs(Math.tan(rad/2.0)))+ 0.1)/(1.0/Math.abs(Math.tan(rad/2.0)));
-	        console.log(width_scene, Math.tan(rad/2.0));
-	        /*var scale_y = self.proportion.y * width_scene;*/
-	        var scale_y =  width_scene/self.proportion.h;
-	        geometry.translate(- self.proportion.w/2.0, -self.proportion.h/2.0, 0);
-			geometry.scale(scale_y, -scale_y, scale_y);
-		//geometry.normalize();
-	        //console.log("Normalized");
-		//for (var i = 0; i < geometry.vertices.length; i++) {
-		//	console.log(geometry.vertices[i]);
-		//};
 
-		//correct 
-		//geometry.scale(1.0,-1.0,1.0);
+        geometry.normalize();
+        geometry.scale(self.proportion.y, -self.proportion.y, self.proportion.y);
+        /*
+        var rad = 75.0 * Math.PI/180;
+        var width_scene  = 2 * ((1.0/Math.abs(Math.tan(rad/2.0)))+ 0.1)/(1.0/Math.abs(Math.tan(rad/2.0)));
+        //console.log(width_scene, Math.tan(rad/2.0));
+        //var scale_y = self.proportion.y * width_scene;
+        var scale_y =  width_scene/self.proportion.h;
+        geometry.translate(- self.proportion.w/2.0, -self.proportion.h/2.0, 0);
+		geometry.scale(scale_y, -scale_y, scale_y);
+		*/
 		
 		//So as to allow smooth shading
 		geometry.computeVertexNormals();
@@ -124,8 +122,6 @@ var world = new function() {
 		objects.push(object);
 
 	};
-
-	var smoothGeometry
 
 	var render = function () {
 		requestAnimationFrame( render );
@@ -160,23 +156,20 @@ var world = new function() {
 			selected.p = intersect[0].point;
 			//console.log(translateVector,intersect[0].point, selected.p);
 		}
-		if(!self.isDragging && intersects) {
-			var deltaRotationQuaternion =  new THREE.Quaternion()
+		if(self.isRotating) {
+			var deltaRotationQuaternion = new THREE.Quaternion()
 			.setFromEuler(new THREE.Euler(
-				toRadians(deltaMove.y * 1),
-				toRadians(deltaMove.x * 1),
-				0,
-				'XYZ'
-				));
-			var object = intersects[0];
-        object.quaternion.multiplyQuaternions(deltaRotationQuaternion, object.quaternion);
+			toRadians(deltaMove.y * 0.5),
+			toRadians(deltaMove.x * 0.5),
+			0,
+			'XYZ'
+			));
+			selected.obj.quaternion.multiplyQuaternions(deltaRotationQuaternion, selected.obj.quaternion);
 		}
 		previousMousePosition = { x: e.clientX, y: e.clientY};
 	}
 
-	this.onMouseDown = function(e) {
-		console.log('entrei');
-
+	this.onMouseDownTranslate = function(e) {
 		raycaster.setFromCamera(mouse,camera);
 		var intersection = raycaster.intersectObjects(objects);
 		if (intersection) {
@@ -184,7 +177,7 @@ var world = new function() {
 			selected.obj =  intersection[0].object;
 			selected.p = intersection[0].point;
 
-			console.log( intersection, selected.obj, camera, mouse);
+			//console.log( intersection, selected.obj, camera, mouse);
 			
 			var vector =  new THREE.Vector3(0,0,20);
 			plane.position.copy(selected.p);
@@ -195,7 +188,25 @@ var world = new function() {
 
 	this.onMouseUp =  function(e) {
         self.isDragging = false;
-      }
+    }
+
+    this.onDelete =  function(e) {
+    	raycaster.setFromCamera(mouse,camera);
+		var intersec_delete = raycaster.intersectObjects(objects);
+		if(intersec_delete.length > 0) {
+			//console.log(intersec_delete);
+			for(var i = 0; i < objects.length; i++ ){
+				if(intersec_delete[0].object.id == objects[i].id){
+					//console.log('entrei');
+					objects.splice(i,1);
+					scene.remove(intersec_delete[0].object);
+				}
+			}
+			//console.log(objects);
+			render();
+		}
+    }
+
 
 	function toRadians (degrees) {
         return degrees * (Math.PI/180);
