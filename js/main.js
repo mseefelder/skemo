@@ -17,7 +17,7 @@ var main = new function () {
         document.addEventListener("mousemove", sketch1.mouseMoveHandle, false);
         document.addEventListener("mousedown", sketch1.mouseDownHandle, false);
         //document.addEventListener("mouseup", sketch.mouseUpHandle, false);
-        document.addEventListener("mouseup",function(){
+        document.addEventListener("mouseup",function(event){
           sketchToMesh(event, sketch1); 
         } , false);
         canvas3d.addEventListener("mouseout", sketch1.mouseOutHandle, false);
@@ -48,6 +48,7 @@ $(document).ready(function () {
         document.removeEventListener('mousemove', world.onMouseMove, false);
         document.removeEventListener('mousedown',world.onMouseDown,false);
         document.removeEventListener('mouseup',world.onMouseUp,false);
+        document.removeEventListener('click', world.onDelete, false);
         if(canvas2d.style.display == "none") {
             canvas2d.style.display = 'block';
             canvas3d.style.display = 'none';
@@ -71,7 +72,15 @@ $(document).ready(function () {
 
         document.addEventListener('mousedown',world.onMouseDown,false);
         document.addEventListener('mouseup',world.onMouseUp,false);
+        document.removeEventListener('click', world.onDelete, false);
 
 
+    });
+
+    $('#delete').on('click', function(){
+        document.addEventListener('mousemove', world.onMouseMove, false);
+        document.removeEventListener('mousedown',world.onMouseDown,false);
+        document.removeEventListener('mouseup',world.onMouseUp,false);
+        document.addEventListener('click', world.onDelete, false);
     });
 })
