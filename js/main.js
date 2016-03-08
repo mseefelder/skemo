@@ -66,13 +66,31 @@ $(document).ready(function () {
     });
 
     $('#translate').on('click', function() {
+        world.isRotating = false;
         var canvas2d = document.getElementById('2dcanvas');
         var canvas3d = document.getElementById('3dcanvas');
         canvas2d.style.display == 'none';
         canvas3d.style.display = 'block';
         document.addEventListener('mousemove', world.onMouseMove, false);
 
+        document.removeEventListener('mousedown',world.onMouseDownRotate,false);
         document.addEventListener('mousedown',world.onMouseDownTranslate,false);
+        document.addEventListener('mouseup',world.onMouseUp,false);
+        document.removeEventListener('click', world.onDelete, false);
+
+
+    });
+
+    $('#rotate').on('click', function() {
+        world.isTranslating = false;
+        var canvas2d = document.getElementById('2dcanvas');
+        var canvas3d = document.getElementById('3dcanvas');
+        canvas2d.style.display == 'none';
+        canvas3d.style.display = 'block';
+        document.addEventListener('mousemove', world.onMouseMove, false);
+
+        document.removeEventListener('mousedown', world.onMouseDownTranslate, false);
+        document.addEventListener('mousedown',world.onMouseDownRotate,false);
         document.addEventListener('mouseup',world.onMouseUp,false);
         document.removeEventListener('click', world.onDelete, false);
 
