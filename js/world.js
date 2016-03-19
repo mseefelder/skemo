@@ -1,5 +1,5 @@
 var world = new function() {
-	var scene, camera, renderer, parent, plane;
+	var scene, camera, renderer, parent, plane, obj;
 	var objects = new Array();
 	var raycaster = new THREE.Raycaster();
 	var mouse = new THREE.Vector2(); 
@@ -16,6 +16,7 @@ var world = new function() {
 	var translateOffset = new THREE.Vector3();
 	var selected = {obj: null, p: null};
         this.proportion = {y : 0, w: 0, h: 0};
+
 	this.init3d = function (p, canvas) {
 		parent = p;
 		this.canvas3d = canvas;
@@ -25,6 +26,9 @@ var world = new function() {
 	    size = { w: this.canvas3d.width, h:this.canvas3d.height};
 
 		scene = new THREE.Scene();
+		obj = new THREE.Object3D;
+		scene.add(obj);
+
 		camera = new THREE.PerspectiveCamera( 75, this.canvas3d.width/this.canvas3d.height, 0.1, 1000 );
 
 		renderer = new THREE.WebGLRenderer({canvas: this.canvas3d});
@@ -45,6 +49,8 @@ var world = new function() {
 		//Plane used for translation
 		plane =  new THREE.Mesh(new THREE.PlaneBufferGeometry(this.canvas3d.width, this.canvas3d.height,8,8), new THREE.MeshBasicMaterial({color: 0xff0000,
 		 transparent: true, opacity: 0}));
+		//plane =  new THREE.Mesh(new THREE.PlaneBufferGeometry(1.0, 1.0,8,8), new THREE.MeshBasicMaterial({color: 0xff0000,
+		// transparent: true, opacity: 0.5}));
 		scene.add(plane);
 		plane.position.set(size.w,size.h,0);
         plane.visible = true;
@@ -57,6 +63,8 @@ var world = new function() {
 	}
 
 	this.buildObject = function (contour, steiner, arrayDistance, triangles) {
+		//var material = new THREE.MeshDepthMaterial();
+		//var material = new THREE.MeshBasicMaterial({ color: 0xdddddd, wireframe: true, side: THREE.DoubleSide});
 		var material = new THREE.MeshPhongMaterial( { color: 0xdddddd, specular: 0xffffff, shininess: 10, shading: THREE.SmoothShading, side: THREE.DoubleSide } );
 		var geometry = new THREE.Geometry();
 
@@ -90,9 +98,12 @@ var world = new function() {
 			geometry.faces.push( new THREE.Face3( triangles[i].getPoint(0).id-1, triangles[i].getPoint(1).id-1, triangles[i].getPoint(2).id-1 ) );
 
 			//create back faces
-			var a = ((triangles[i].getPoint(0).id-1)>=cl)?(triangles[i].getPoint(0).id-1+sl):(triangles[i].getPoint(0).id-1);
+			//var a = ((triangles[i].getPoint(0).id-1)>=cl)?(triangles[i].getPoint(0).id-1+sl):(triangles[i].getPoint(0).id-1);
+			//var b = ((triangles[i].getPoint(1).id-1)>=cl)?(triangles[i].getPoint(1).id-1+sl):(triangles[i].getPoint(1).id-1);
+			//var c = ((triangles[i].getPoint(2).id-1)>=cl)?(triangles[i].getPoint(2).id-1+sl):(triangles[i].getPoint(2).id-1);
+			var a = ((triangles[i].getPoint(2).id-1)>=cl)?(triangles[i].getPoint(2).id-1+sl):(triangles[i].getPoint(2).id-1);
 			var b = ((triangles[i].getPoint(1).id-1)>=cl)?(triangles[i].getPoint(1).id-1+sl):(triangles[i].getPoint(1).id-1);
-			var c = ((triangles[i].getPoint(2).id-1)>=cl)?(triangles[i].getPoint(2).id-1+sl):(triangles[i].getPoint(2).id-1);
+			var c = ((triangles[i].getPoint(0).id-1)>=cl)?(triangles[i].getPoint(0).id-1+sl):(triangles[i].getPoint(0).id-1);
 
 			geometry.faces.push( new THREE.Face3( a, b, c ) );
 		};
@@ -100,8 +111,19 @@ var world = new function() {
 		//Add sketches proportional to their size
         geometry.normalize();
         geometry.scale(self.proportion.y, -self.proportion.y, self.proportion.y);
-		
+
+        geometry = dumbSmoothGeometry(geometry);
+        geometry = dumbSmoothGeometry(geometry);
+        geometry = dumbSmoothGeometry(geometry);
+
+        //dumbSmoothGeometry(geometry);
+        //dumbSmoothGeometry(geometry);
+        //dumbSmoothGeometry(geometry);
+
+		geometry.verticesNeedUpdate = true;
+
 		//So as to allow smooth shading
+		geometry.computeFaceNormals();
 		geometry.computeVertexNormals();
 
 		//Bounding sphere
@@ -109,9 +131,7 @@ var world = new function() {
 
 		var object = new THREE.Mesh( geometry, material );
 		
-		//scene.add( object );
 		objects.push(object);
-
 	};
 
 	var render = function () {
@@ -122,6 +142,14 @@ var world = new function() {
 				scene.add(objects[i]);
 			}
 		}
+
+		//var axis = new THREE.Vector3(1,0,0);
+		//scene.rotateOnAxis(axis, 0.01);
+		//cameraOffset.normalize().applyAxisAngle(axis, 0.01).setLength(cameraOffset.length());
+		//camera.up.applyAxisAngle(axis, 0.01);
+		//camera.position.copy(cameraOffset);
+		//camera.lookAt(new THREE.Vector3(0,0,0));
+		//console.log("Camera: ", cameraOffset);
 		
 		renderer.render(scene, camera);
 	};
@@ -149,6 +177,9 @@ var world = new function() {
 				//from the object's origin (o) to the parameter passed (p): p - o
 				//so, we add the object's position (o) to make lookAt look at p
 				at.copy(camera.position).add(plane.position);
+				//var rot = new THREE.Matrix4();
+				//rot.getInverse(rot.clone().makeRotationFromQuaternion(scene.quaternion.clone()));
+				//at.applyMatrix4(rot);
 				plane.lookAt(at);
 			}
 		}
@@ -167,10 +198,13 @@ var world = new function() {
 					camera.matrixWorldInverse, scene.matrix
 				)
 			));
+			//scene.rotateOnAxis(axis, 0.01);
+
 			var offsetLength = cameraOffset.length();
-			cameraOffset.normalize().applyAxisAngle(axis, -1.0*angle).setLength(offsetLength);
+			cameraOffset.normalize().applyAxisAngle(axis.negate(), angle).setLength(offsetLength);
 			camera.position.copy(cameraOffset);
 			camera.lookAt(new THREE.Vector3(0,0,0));
+
 			initialRotationVector = finalRotationVector.clone();
 		}
 		previousMousePosition = { x: e.clientX, y: e.clientY};
@@ -234,5 +268,66 @@ var world = new function() {
 	function toRadians (degrees) {
         return degrees * (Math.PI/180);
       }
+
+    function dumbSmoothGeometry (geom) {
+    	var smoothing = new Array(geom.vertices.length);
+    	/**/
+    	var weights = new Array(geom.vertices.length);
+    	for (var i = 0; i < smoothing.length; i++) {
+    		smoothing[i] = geom.vertices[i].clone();
+    		weights[i] = 1.0;
+    	};
+
+    	var tri = 0;
+    	for (var i = 0; i < geom.faces.length; i++) {
+    		tri = geom.faces[i].clone();
+
+    		smoothing[tri.a].add(geom.vertices[tri.b]).add(geom.vertices[tri.c]);
+    		smoothing[tri.b].add(geom.vertices[tri.a]).add(geom.vertices[tri.c]);
+    		smoothing[tri.c].add(geom.vertices[tri.a]).add(geom.vertices[tri.b]);
+
+    		weights[tri.a] += 2.0;
+    		weights[tri.b] += 2.0;
+    		weights[tri.c] += 2.0;
+    	};
+
+    	for (var i = 0; i < smoothing.length; i++) {
+    		//console.log(weights[i], " & ", smoothing[i]);
+    		smoothing[i] = smoothing[i].divideScalar(weights[i]);
+    		geom.vertices[i] = smoothing[i].clone();
+    	};
+
+    	return geom;
+		/**/
+		/**
+		for (var i = 0; i < geom.vertices.length; i++) {
+			smoothing[i] = geom.vertices[i].clone();
+		};
+
+
+
+		for (var i = 0; i < smoothing.length; i++) {
+    		geom.vertices[i] = smoothing[i].clone();
+    	};
+
+    	return geom;
+    	/**/
+    }
+
+    function catmullClarkSubdiv (geom) {
+    	//face points
+    	var faceP = new Array(geom.faces.length);
+
+		var tri = 0;
+    	for (var i = 0; i < geom.faces.length; i++) {
+    		tri = geom.faces[i].clone();
+    		faceP[i] = geom.vertices[tri.a]
+    			.clone()
+    			.add(geom.vertices[tri.b])
+    			.add(geom.vertices[tri.c])
+    			.divideScalar(3.0);
+
+    	};    	
+    }
 
 }

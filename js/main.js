@@ -19,7 +19,9 @@ var main = new function () {
         document.addEventListener("mouseup",function( event ){
           sketchToMesh(event, sketch1); 
         } , false);
-        canvas3d.addEventListener("mouseout", sketch1.mouseOutHandle, false);
+        //document.addEventListener("mouseup", sketch1.mouseUpHandle, false);
+        document.addEventListener("mouseout", sketch1.mouseOutHandle, false);
+        //canvas3d.addEventListener("mouseout", sketch1.mouseOutHandle, false);
     };
 
     //Function to be called on sketching mouseup to create mesh
